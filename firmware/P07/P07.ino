@@ -1,6 +1,7 @@
 // P07 · 딸기 하우스 습도 신호등
 // DHT11로 습도를 재서 LCD1602에 표시하고 RGB LED 색으로 상태를 알립니다.
-//   낮음(60% 미만) = 노랑 / 적정(60–85%) = 초록 / 높음(85% 이상) = 빨강
+//   낮음(60% 미만) = 파랑 / 적정(60–85%) = 초록 / 높음(85% 이상) = 빨강
+//   측정 전·센서 오류 = 파랑 깜빡임
 //   낮음·높음으로 바뀌면 D8 부저가 짧게 울립니다 (높음 = 3번, 낮음 = 2번, 적정 = 안 울림)
 // 대시보드와는 USB 시리얼 115200, JSON 한 줄 규약으로 대화합니다(protocol.h).
 //
@@ -33,7 +34,8 @@ bool buzzerOn = true;                 // false면 경보음을 내지 않음 (BU
 uint8_t outR = 0, outG = 0, outB = 0;  // 마지막으로 낸 PWM 값
 bool lcdReady = false;
 
-unsigned long lastDhtMs = 0, lastStateMs = 0, lastLcdMs = 0;
+unsigned long lastDhtMs = 0, lastStateMs = 0, lastLcdMs = 0, lastBlinkMs = 0;
+bool blinkOn = true;                  // 센서 확인 상태의 파랑 깜빡임
 
 Level alarmLevel = LEVEL_NONE;  // 마지막으로 경보를 판단한 상태 (센서 오류 동안은 그대로 둠)
 uint8_t beepLeft = 0;           // 남은 울림 횟수
@@ -53,12 +55,12 @@ void writeChannel(uint8_t pin, uint8_t value) {
 void applyOutputs() {
   outR = outG = outB = 0;
   if (lightOn) {
-    // 노랑 = 빨강 + 초록. 초록 LED가 더 밝아 절반만 켜야 노랑에 가깝게 보입니다.
-    if (level == LEVEL_LOW)  { outR = bright; outG = bright / 2; }
+    // 섞은 색은 모듈에서 점 두 개로 따로 보이므로 한 가지 색만 씁니다.
+    if (level == LEVEL_LOW)  outB = bright;
     if (level == LEVEL_OK)   outG = bright;
     if (level == LEVEL_HIGH) outR = bright;
-    // LEVEL_NONE(측정 전·센서 오류): 불이 꺼지지 않도록 상태색과 겹치지 않는 파랑을 켭니다.
-    if (level == LEVEL_NONE) outB = bright;
+    // LEVEL_NONE(측정 전·센서 오류): 불이 꺼지지 않도록 파랑을 깜빡여 건조(파랑 켜짐)와 구별합니다.
+    if (level == LEVEL_NONE && blinkOn) outB = bright;
   }
   writeChannel(PIN_RGB_R, outR);
   writeChannel(PIN_RGB_G, outG);
@@ -273,7 +275,7 @@ void setup() {
   // 1) 출력부터 끈 상태로 만듭니다.
   pinMode(PIN_RGB_R, OUTPUT); pinMode(PIN_RGB_G, OUTPUT); pinMode(PIN_RGB_B, OUTPUT);
   buzzerBegin();
-  applyOutputs();  // level = NONE → 파랑 (측정 중)
+  applyOutputs();  // level = NONE → 파랑 깜빡임 (측정 중)
 
   Serial.begin(SERIAL_BAUD);
   dht.begin();
@@ -300,5 +302,10 @@ void loop() {
   if (now - lastDhtMs >= DHT_INTERVAL_MS) { lastDhtMs = now; readSensor(); }
   if (now - lastLcdMs >= LCD_INTERVAL_MS) { lastLcdMs = now; drawLcd(); }
   if (now - lastStateMs >= STATE_INTERVAL_MS) { lastStateMs = now; sendState(0); }
+  if (now - lastBlinkMs >= BLINK_MS) {
+    lastBlinkMs = now;
+    blinkOn = !blinkOn;
+    if (level == LEVEL_NONE) applyOutputs();
+  }
   updateBuzzer(now);
 }

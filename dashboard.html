@@ -11,7 +11,7 @@
 :root{
   --bg:#f6f7f3; --surface:#ffffff; --soft:#eef1ea; --line:#c9d0c5; --fg:#18211b; --muted:#4c5a50;
   --brand:#1f5136; --brand-fg:#ffffff; --focus:#0b57d0;
-  --low:#a86b00;  --low-bg:#fff3cc;  --low-fg:#6b4300;
+  --low:#1d5fbf;  --low-bg:#e2ecfb;  --low-fg:#123e80;
   --ok:#1f7a3d;   --ok-bg:#e1f2e6;   --ok-fg:#14532b;
   --high:#c62828; --high-bg:#fde4e2; --high-fg:#8a1414;
   --warn-bg:#fff2d6; --warn-fg:#6b4300; --err-bg:#fde4e2; --err-fg:#8a1414;
@@ -23,7 +23,7 @@
 @media (prefers-color-scheme: dark){:root{
   --bg:#121614; --surface:#1b211d; --soft:#232b25; --line:#3a463e; --fg:#e9efea; --muted:#aab8ae;
   --brand:#8fd0a8; --brand-fg:#0d1a12; --focus:#8ab4ff;
-  --low:#f2c14e; --low-bg:#3d3010; --low-fg:#ffe7a6;
+  --low:#7fb0ff; --low-bg:#1b2d4a; --low-fg:#c9dcff;
   --ok:#6fd48f;  --ok-bg:#183524; --ok-fg:#c4f0d2;
   --high:#ff8a80;--high-bg:#4a1f1d;--high-fg:#ffd2cd;
   --warn-bg:#3d2f10; --warn-fg:#ffe2a6; --err-bg:#4a1f1d; --err-fg:#ffd2cd;
@@ -205,7 +205,7 @@ ol.log time{font-family:var(--mono);font-size:.88rem;color:var(--muted)}
           <div class="field">
             <label for="rh-low">낮음 기준 (%)</label>
             <input id="rh-low" name="rh-low" type="number" inputmode="numeric" min="1" max="99" step="1" value="60" aria-describedby="rh-low-hint rh-low-err">
-            <span class="hint" id="rh-low-hint">이 값 미만이면 노랑</span>
+            <span class="hint" id="rh-low-hint">이 값 미만이면 파랑</span>
           </div>
           <div class="field">
             <label for="rh-high">높음 기준 (%)</label>
@@ -280,13 +280,13 @@ ol.log time{font-family:var(--mono);font-size:.88rem;color:var(--muted)}
     <h2 id="help-title">도움말</h2>
     <dl>
       <dt>색과 모양의 뜻</dt>
-      <dd>▼ 노랑 낮음 = 건조(증산 과다, 잎 끝 마름 주의) · ● 초록 적정 · ▲ 빨강 높음 = 과습(잿빛곰팡이병 위험, 환기 필요). 같은 뜻이 글자로도 표시됩니다.</dd>
+      <dd>▼ 파랑 낮음 = 건조(증산 과다, 잎 끝 마름 주의) · ● 초록 적정 · ▲ 빨강 높음 = 과습(잿빛곰팡이병 위험, 환기 필요). 같은 뜻이 글자로도 표시됩니다. 보드 LED가 파랑으로 <b>깜빡이면</b> 측정 중이거나 센서를 읽지 못한 상태입니다.</dd>
       <dt>왜 경계에서 바로 색이 안 바뀌나요?</dt>
       <dd>85 %에서 빨강이 된 뒤에는 83 % 이하로 내려가야 초록으로 돌아갑니다(낮음 쪽은 60 % / 62 %). 센서 값이 경계에서 흔들릴 때 신호가 깜빡이지 않게 하는 여유 구간입니다.</dd>
       <dt>부저는 언제 울리나요?</dt>
       <dd>적정에서 낮음으로 바뀌면 2번, 높음으로 바뀌면 3번 짧게 울립니다. 같은 상태가 이어지면 다시 울리지 않고, 적정일 때는 울리지 않습니다. "보드 부저" 버튼으로 끌 수 있고, "화면 알림음"은 이 PC에서만 나는 소리라 보드 부저와 따로 켜고 끕니다.</dd>
       <dt>"값 없음"과 0 %는 다릅니다</dt>
-      <dd>센서를 읽지 못하면 0이 아니라 "값 없음"으로 표시하고 보드 신호등은 파랑으로 켭니다. 3초 넘게 보드 소식이 없으면 "응답 없음"을 표시하고 설정 버튼을 잠급니다. 이때 LED가 꺼졌다고 가정하지 않습니다.</dd>
+      <dd>센서를 읽지 못하면 0이 아니라 "값 없음"으로 표시하고 보드 신호등은 파랑으로 깜빡입니다. 3초 넘게 보드 소식이 없으면 "응답 없음"을 표시하고 설정 버튼을 잠급니다. 이때 LED가 꺼졌다고 가정하지 않습니다.</dd>
       <dt>연결이 안 될 때</dt>
       <dd>데이터용 USB 케이블인지, 보드에 P07 코드가 올라가 있는지, Arduino 시리얼 모니터가 닫혀 있는지 확인하세요. USB 직접 연결은 Chrome·Edge에서만 됩니다. 다른 브라우저는 PC 연결 프로그램(브리지)을 쓰세요.</dd>
       <dt>측정 정확도</dt>
@@ -309,10 +309,10 @@ const STRAWBERRY = { low: 60, high: 85 };
 const HYST = 2;
 
 const LEVELS = {
-  low:  { text: "낮음", color: "노랑", meaning: "건조합니다. 증산이 많아 잎 끝이 마를 수 있어요. 관수·차광·환기 조절을 확인하세요." },
+  low:  { text: "낮음", color: "파랑", meaning: "건조합니다. 증산이 많아 잎 끝이 마를 수 있어요. 관수·차광·환기 조절을 확인하세요." },
   ok:   { text: "적정", color: "초록", meaning: "딸기 관리 범위 안입니다." },
   high: { text: "높음", color: "빨강", meaning: "과습입니다. 잿빛곰팡이병 위험이 커져요. 환기가 필요합니다." },
-  none: { text: "값 없음", color: "파랑", meaning: "센서 값을 받지 못했습니다." },
+  none: { text: "값 없음", color: "파랑 깜빡임", meaning: "센서 값을 받지 못했습니다." },
 };
 const ICONS = { // 색 말고도 모양으로 구분
   low:  '<svg viewBox="0 0 30 30"><path d="M4 8h22L15 25z" fill="currentColor"/></svg>',
@@ -425,7 +425,7 @@ class SimTransport {
     if (prev === "low" && this.rh < this.low + HYST) return "low";
     return plain();
   }
-  rgb() { if (!this.light) return [0, 0, 0]; if (!this.level) return [0, 0, this.bright]; return this.level === "low" ? [this.bright, this.bright >> 1, 0] : this.level === "ok" ? [0, this.bright, 0] : [this.bright, 0, 0]; }
+  rgb() { if (!this.light) return [0, 0, 0]; if (!this.level) return [0, 0, this.bright]; return this.level === "low" ? [0, 0, this.bright] : this.level === "ok" ? [0, this.bright, 0] : [this.bright, 0, 0]; }
   tick() {
     this.ms += 1000;
     if (++this.dhtTick % 2 === 0) { // 2초마다 측정
@@ -571,7 +571,7 @@ function onState(s) {
   const lv = s.rh_level ?? "none";
   if (app.lastLevel !== undefined && lv !== app.lastLevel) {
     const L = LEVELS[lv];
-    const msg = lv === "none" ? "센서 값을 받지 못했습니다. 보드 신호등은 파랑으로 켭니다." : `습도 ${fmt(s.humidity_pct)}% · ${L.text} (${L.color})`;
+    const msg = lv === "none" ? "센서 값을 받지 못했습니다. 보드 신호등은 파랑으로 깜빡입니다." : `습도 ${fmt(s.humidity_pct)}% · ${L.text} (${L.color})`;
     addLog("상태 변화: " + msg); announce(msg);
     if (app.sound && (lv === "high" || lv === "low")) beep(lv);
   }
@@ -700,7 +700,7 @@ function renderNow() {
   els.t.textContent = s && app.connected && s.temperature_c !== null ? `${fmt(s.temperature_c, 1)} °C` : "값 없음";
   if (s) {
     const [r, g, b] = s.rgb || [0, 0, 0];
-    els.rgb.textContent = !s.light_on ? "꺼짐 (사용자가 끔)" : r && g ? `노랑 (${r}, ${g})` : r ? `빨강 (${r})` : g ? `초록 (${g})` : b ? `파랑 (${b}, 측정 중·센서 확인)` : "꺼짐";
+    els.rgb.textContent = !s.light_on ? "꺼짐 (사용자가 끔)" : !s.rh_level ? "파랑 깜빡임 (측정 중·센서 확인)" : r ? `빨강 (${r})` : g ? `초록 (${g})` : b ? `파랑 (${b})` : "꺼짐";
     els.lcd.textContent = s.lcd_ready ? "정상" : "인식 안 됨 (A4·A5·전원 확인)";
     els.buzzState.textContent = s.buzzer_on === undefined ? "알 수 없음 (보드 코드 확인)"
       : s.buzzer_on ? "켜짐 · 낮음 2번, 높음 3번" : "꺼짐 (사용자가 끔)";

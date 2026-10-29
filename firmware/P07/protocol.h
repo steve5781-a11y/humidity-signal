@@ -24,13 +24,14 @@ const unsigned long SERIAL_BAUD = 115200UL;
 const unsigned long DHT_INTERVAL_MS   = 2000UL;  // DHT11은 2초보다 자주 읽지 않습니다
 const unsigned long STATE_INTERVAL_MS = 1000UL;  // 상태 자동 전송 주기
 const unsigned long LCD_INTERVAL_MS   = 1000UL;  // LCD 다시 그리기 주기
+const unsigned long BLINK_MS          = 500UL;   // 센서 확인 상태의 파랑 깜빡임 (0.5초 켜짐·0.5초 꺼짐)
 
 // DHT11 연속 실패 허용 횟수: 이 횟수만큼 연속 실패하면 값을 null로 바꿉니다.
 // (2회 × 2초 = 약 4초. 한 번의 일시적 실패로 화면이 깜빡이지 않게 합니다)
 const uint8_t DHT_FAIL_LIMIT = 2;
 
 // 습도 기준 기본값 — 딸기 초기값 60–85 % (대시보드에서 바꿀 수 있음)
-const uint8_t DEFAULT_RH_LOW  = 60;  // 이 값 미만 = 낮음(노랑)
+const uint8_t DEFAULT_RH_LOW  = 60;  // 이 값 미만 = 낮음(파랑)
 const uint8_t DEFAULT_RH_HIGH = 85;  // 이 값 이상 = 높음(빨강)
 const uint8_t RH_HYSTERESIS   = 2;   // 되돌아갈 때 필요한 여유 (%)
 const uint8_t DEFAULT_BRIGHT  = 80;  // RGB 밝기 0–255

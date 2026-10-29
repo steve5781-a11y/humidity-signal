@@ -73,14 +73,14 @@
       <table>
         <thead><tr><th scope="col">상태</th><th scope="col">습도</th><th scope="col">보드 LED</th><th scope="col">부저</th><th scope="col">LCD 2번째 줄</th><th scope="col">할 일</th></tr></thead>
         <tbody>
-          <tr><th scope="row">▼ 낮음</th><td>60 % 미만</td><td><span class="swatch" style="background:#f2c14e"></span>노랑</td><td>2번 (바뀔 때만)</td><td><code>LOW  (DRY)</code></td><td>관수·차광 확인</td></tr>
+          <tr><th scope="row">▼ 낮음</th><td>60 % 미만</td><td><span class="swatch" style="background:#1565c0"></span>파랑</td><td>2번 (바뀔 때만)</td><td><code>LOW  (DRY)</code></td><td>관수·차광 확인</td></tr>
           <tr><th scope="row">● 적정</th><td>60–85 %</td><td><span class="swatch" style="background:#2e9e4f"></span>초록</td><td>울리지 않음</td><td><code>OK</code></td><td>그대로 유지</td></tr>
           <tr><th scope="row">▲ 높음</th><td>85 % 이상</td><td><span class="swatch" style="background:#d32f2f"></span>빨강</td><td>3번 (바뀔 때만)</td><td><code>HIGH (VENT)</code></td><td>환기 (잿빛곰팡이병 위험)</td></tr>
-          <tr><th scope="row">◌ 값 없음</th><td>센서 읽기 실패</td><td><span class="swatch" style="background:#1565c0"></span>파랑</td><td>울리지 않음</td><td><code>CHECK SENSOR</code></td><td>DHT11 배선 확인</td></tr>
+          <tr><th scope="row">◌ 값 없음</th><td>측정 전·센서 읽기 실패</td><td><span class="swatch" style="background:#1565c0"></span>파랑 <b>깜빡임</b></td><td>울리지 않음</td><td><code>CHECK SENSOR</code></td><td>DHT11 배선 확인</td></tr>
         </tbody>
       </table>
     </div>
-    <p class="small muted">색만으로 뜻을 전하지 않도록 모양(▼●▲)과 글자, 부저 횟수를 함께 씁니다. 경계에서 깜빡이지 않도록 2 %씩 여유를 둡니다(85 %에서 빨강 → 83 % 이하에서 초록).</p>
+    <p class="small muted">색만으로 뜻을 전하지 않도록 모양(▼●▲)과 글자, 부저 횟수를 함께 씁니다. 같은 파랑이라도 계속 켜져 있으면 건조, 깜빡이면 센서 확인입니다. 경계에서 깜빡이지 않도록 2 %씩 여유를 둡니다(85 %에서 빨강 → 83 % 이하에서 초록).</p>
   </section>
 
   <section aria-labelledby="start">
@@ -116,7 +116,7 @@
         <h3 class="res-ok">실물로 확인함 (2026-10-29)</h3>
         <ul class="plain small">
           <li>DHT11 측정값 수신 (습도 52–58 %, 온도 약 27 °C, 실패 0회)</li>
-          <li>상태별 LED 색: 초록 → 빨강 → 초록 → 노랑 → 초록</li>
+          <li>상태별 LED 색: 적정 초록, 높음 빨강, 낮음 파랑 (건조 = 파랑은 2026-10-29 변경 후 보드 출력값으로 확인)</li>
           <li>부저: 높음 3번·낮음 2번, 적정일 때 조용함, 소리 크기 적당함</li>
           <li>LCD 숫자·상태 글자 표시, 잘못된 기준값(낮음 ≥ 높음) 거절</li>
         </ul>

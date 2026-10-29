@@ -87,7 +87,7 @@ pre{margin:0;font-family:var(--f-mono);font-size:.85rem;background:var(--soft);b
 <header>
   <p class="eyebrow">Smart farm · Arduino UNO · 회로 P07 (제안)</p>
   <h1>딸기 하우스 습도 신호등 · 한 선씩 연결</h1>
-  <p class="lede">DHT11로 습도를 재서 LCD에 숫자와 상태를 띄우고, RGB LED로 낮음은 노랑, 적정은 초록, 높음은 빨강을 켭니다. 낮음·높음으로 바뀌면 부저가 짧게 울립니다(낮음 2번, 높음 3번). 같은 값과 색을 웹 대시보드에도 보여 줍니다.</p>
+  <p class="lede">DHT11로 습도를 재서 LCD에 숫자와 상태를 띄우고, RGB LED로 낮음은 파랑, 적정은 초록, 높음은 빨강을 켭니다. 낮음·높음으로 바뀌면 부저가 짧게 울립니다(낮음 2번, 높음 3번). 같은 값과 색을 웹 대시보드에도 보여 줍니다.</p>
   <ul class="chips" aria-label="회로 요약">
     <li>UNO 호환 R3 1대</li><li>USB 전원만 사용</li><li>암–수 점퍼 11개 (키트 10개 + 1개 추가)</li><li>수–수 점퍼 15개</li><li>시리얼 115200 · JSON</li>
   </ul>
@@ -143,17 +143,17 @@ pre{margin:0;font-family:var(--f-mono);font-size:.85rem;background:var(--soft);b
     <caption>습도 상태 (딸기 초기값 · 확인 후 수정)</caption>
     <thead><tr><th scope="col">상태</th><th scope="col">습도</th><th scope="col">RGB</th><th scope="col">부저</th><th scope="col">LCD 2번째 줄</th><th scope="col">농업적 의미</th></tr></thead>
     <tbody>
-      <tr><th scope="row">낮음</th><td>60 % 미만</td><td>노랑</td><td>2번 (들어갈 때만)</td><td><code>LOW  (DRY)</code></td><td>건조 · 증산 과다, 잎 끝 마름 주의</td></tr>
+      <tr><th scope="row">낮음</th><td>60 % 미만</td><td>파랑</td><td>2번 (들어갈 때만)</td><td><code>LOW  (DRY)</code></td><td>건조 · 증산 과다, 잎 끝 마름 주의</td></tr>
       <tr><th scope="row">적정</th><td>60 – 85 %</td><td>초록</td><td>울리지 않음</td><td><code>OK</code></td><td>관리 범위 안</td></tr>
       <tr><th scope="row">높음</th><td>85 % 이상</td><td>빨강</td><td>3번 (들어갈 때만)</td><td><code>HIGH (VENT)</code></td><td>과습 · 잿빛곰팡이병 위험, 환기 필요</td></tr>
-      <tr><th scope="row">센서 오류</th><td>읽기 실패 (<code>null</code>)</td><td>파랑</td><td>울리지 않음</td><td><code>CHECK SENSOR</code></td><td>상태색과 겹치지 않는 파랑으로 "측정 중·센서 확인"을 알립니다</td></tr>
+      <tr><th scope="row">센서 오류</th><td>측정 전·읽기 실패 (<code>null</code>)</td><td>파랑 깜빡임</td><td>울리지 않음</td><td><code>CHECK SENSOR</code></td><td>불을 끄지 않고 파랑을 깜빡여 건조(파랑 켜짐)와 구별합니다</td></tr>
     </tbody>
   </table></div>
   <ul class="plain">
     <li>여유 구간: 적정 → 높음은 85 %에서, 높음 → 적정은 83 % 이하에서 바뀝니다. 낮음 쪽도 60 % / 62 %로 같은 방식입니다.</li>
     <li>LCD1602는 한글을 바로 표시하지 못해 영문으로 씁니다. 1번째 줄 예: <code>RH 72%  T 24C</code></li>
     <li>색만으로 상태를 전달하지 않습니다. LCD와 대시보드에 "낮음 / 적정 / 높음" 글자를 함께 띄워 색약인 사람도 읽을 수 있게 합니다(WCAG 1.4.1).</li>
-    <li>교실 시연: 센서에 입김을 불면 빨강, 마른 바람(부채·드라이어 찬바람)을 쐬면 노랑 쪽으로 움직입니다. 교실 습도는 대개 낮아서 처음에는 노랑이 켜지고 부저가 2번 울릴 수 있습니다.</li>
+    <li>교실 시연: 센서에 입김을 불면 빨강, 마른 바람(부채·드라이어 찬바람)을 쐬면 파랑 쪽으로 움직입니다. 교실 습도는 대개 낮아서 처음에는 파랑이 켜지고 부저가 2번 울릴 수 있습니다.</li>
   </ul>
 </section>
 
@@ -218,7 +218,7 @@ pre{margin:0;font-family:var(--f-mono);font-size:.85rem;background:var(--soft);b
 // 형식 예시 · 실제 측정값 아님
 // rh_level: "low" | "ok" | "high" | null
 // DHT 실패·첫 1초: humidity_pct = null,
-//   rh_level = null, rgb = [0,0,80] (파랑)
+//   rh_level = null, rgb = [0,0,80]↔[0,0,0] (파랑 깜빡임)
 // rgb는 보드가 낸 출력값이며 실제 색은
 // 눈으로 확인합니다</pre>
   </div>
@@ -282,7 +282,7 @@ const steps=[
  {t:'부저용 1kΩ 저항을 G28–G30에 꽂으세요.',b:'능동형 부저를 핀에 바로 연결하면 핀에 무리가 갑니다. 저항이 전류를 제한하고 소리도 줄여 줍니다. 소리가 너무 작으면 220Ω으로 바꿉니다.',on:['rZ']},
  {t:'부저를 빵판에 바로 꽂으세요: + → J30, − → J27.',b:'긴 다리 또는 + 표시가 있는 쪽이 +입니다. 두 다리가 3줄 간격이라 그대로 꽂힙니다. 5V에는 연결하지 않습니다(5V에 꽂으면 계속 울립니다).',on:['bZ']},
  ...wires.map(w=>({t:`${lab(w.from)} → 빵판 ${w.to}`,b:w.role,on:[w.id],wire:true})),
- {t:'USB를 꽂기 전 마지막 점검',b:'5V(빨강)와 GND(검정)가 같은 줄에 없는지, RGB 공통 −가 GND 줄과 이어졌는지 확인합니다. USB를 꽂으면 첫 측정(약 1초) 전까지 RGB는 파랑이고 LCD에 MEASURING이 보여야 합니다. 부저가 USB만 꽂아도 계속 울리면 부저 +가 5V에 닿아 있는지 확인하세요.',on:[]},
+ {t:'USB를 꽂기 전 마지막 점검',b:'5V(빨강)와 GND(검정)가 같은 줄에 없는지, RGB 공통 −가 GND 줄과 이어졌는지 확인합니다. USB를 꽂으면 첫 측정(약 1초) 전까지 RGB는 파랑으로 깜빡이고 LCD에 MEASURING이 보여야 합니다. 부저가 USB만 꽂아도 계속 울리면 부저 +가 5V에 닿아 있는지 확인하세요.',on:[]},
 ];
 function lab(f){if(f[0]==='@')return '빵판 '+f.slice(1);return 'UNO '+(f==='GND_T'?'GND (위쪽)':f==='GND'?'GND (아래쪽)':f==='GND_B2'?'GND (아래쪽 두 번째)':f)}
 

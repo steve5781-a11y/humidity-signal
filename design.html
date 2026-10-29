@@ -63,7 +63,7 @@
           <tr><th scope="row">자기 설명성</th><td>상태마다 뜻과 할 일을 문장으로</td><td>"보드 신호등 출력"(명령값)과 실제 LED를 구분해 설명</td><td>시뮬레이션으로 적정·높음·낮음을 차례로 만듦</td><td class="res-ok">상태별 문장·색·LED 설명 표시 (2026-10-29)</td></tr>
           <tr><th scope="row">기대 부합성</th><td>보드 LED·LCD·화면이 같은 색·같은 낱말</td><td>건조 색을 노랑으로 통일, 메뉴를 모든 페이지 같은 자리에</td><td>실물 보드와 화면을 나란히 비교</td><td class="res-ok">일치함 (2026-10-29)</td></tr>
           <tr><th scope="row">학습 용이성</th><td>보드 없이도 연습 가능</td><td>시뮬레이션 연결 방식, 도움말 위치 고정</td><td>시뮬레이션으로 연결·설정 시험</td><td class="res-ok">보드 없이 모든 화면 동작</td></tr>
-          <tr><th scope="row">제어 가능성</th><td>사용자가 끄고 멈출 수 있음</td><td>화면 갱신 멈춤, 신호등·<b>보드 부저</b>·화면 알림음 각각 켜고 끄기</td><td>버튼마다 응답(ack) 확인</td><td class="res-ok">시뮬레이션에서 부저 끄기 적용 확인</td></tr>
+          <tr><th scope="row">제어 가능성</th><td>사용자가 끄고 멈출 수 있음</td><td>화면 갱신 멈춤, 신호등·<b>보드 부저</b>·화면 알림음 각각 켜고 끄기</td><td>버튼마다 응답(ack) 확인</td><td class="res-ok">실물 보드: <code>BUZZ 0/1</code> 적용, <code>BUZZ 5</code> 거절 (2026-10-29)</td></tr>
           <tr><th scope="row">사용 오류 견고성</th><td>잘못된 값을 보내기 전에 막고, 보드도 다시 검사</td><td>틀린 칸 표시·이유·고치는 법, 보드는 <code>error</code>로 거절</td><td>낮음 50 / 높음 30 보내기</td><td class="res-ok">보드가 <code>low_not_below_high</code>로 거절</td></tr>
           <tr><th scope="row">사용자 참여</th><td>작물·취향에 맞게 바꿀 수 있음</td><td>기준값·밝기 조절, 딸기 초기값 한 번에 되돌리기</td><td>기준을 바꾸고 색 변화 확인</td><td class="res-ok">바꾼 기준으로 판단</td></tr>
         </tbody>

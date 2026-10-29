@@ -205,6 +205,7 @@ pre{margin:0;font-family:var(--f-mono);font-size:.85rem;background:var(--soft);b
         <tr><td><code>11 BRIGHT 80</code></td><td>RGB 밝기 0–255</td></tr>
         <tr><td><code>12 LIGHT 1</code> / <code>12 LIGHT 0</code></td><td>신호등 켜기 / 끄기</td></tr>
         <tr><td><code>13 BUZZ 1</code> / <code>13 BUZZ 0</code></td><td>부저 경보 켜기 / 끄기</td></tr>
+        <tr><td><code>14 SET T 10 30</code></td><td>온도 낮음 / 높음 기준 (°C, 0–50)</td></tr>
       </tbody>
     </table></div>
 <pre aria-label="보드에서 PC로 보내는 상태 예시. 형식 예시이며 실제 측정 기록이 아닙니다.">{"v":1,"type":"state","profile":"P07",
@@ -212,6 +213,7 @@ pre{margin:0;font-family:var(--f-mono);font-size:.85rem;background:var(--soft);b
  "humidity_pct":72.0,"temperature_c":24.0,
  "rh_level":"ok",
  "rh_low":60,"rh_high":85,
+ "t_level":"ok","t_low":10,"t_high":30,
  "light_on":true,"rgb":[0,80,0],
  "buzzer_on":true,"lcd_ready":true}
 

@@ -46,7 +46,7 @@
     <div class="cards">
       <div class="card">
         <h3>대시보드</h3>
-        <p class="muted">지금 습도·온도·상태, 10분 그래프, 기준값·밝기·신호등·부저 설정.</p>
+        <p class="muted">지금 습도·온도와 각각의 상태, 10분 그래프 2개, 기준값·밝기·신호등·부저 설정, CSV 저장(온도·습도 골라서).</p>
         <a class="go" href="dashboard.html">대시보드 열기 →</a>
       </div>
       <div class="card">
@@ -80,7 +80,18 @@
         </tbody>
       </table>
     </div>
-    <p class="small muted">색만으로 뜻을 전하지 않도록 모양(▼●▲)과 글자, 부저 횟수를 함께 씁니다. 같은 파랑이라도 계속 켜져 있으면 건조, 깜빡이면 센서 확인입니다. 경계에서 깜빡이지 않도록 2 %씩 여유를 둡니다(85 %에서 빨강 → 83 % 이하에서 초록).</p>
+    <div class="tablebox" tabindex="0" role="region" aria-label="온도 신호의 뜻">
+      <table>
+        <caption>온도 (보드 LED에는 표시하지 않음)</caption>
+        <thead><tr><th scope="col">상태</th><th scope="col">온도</th><th scope="col">부저</th><th scope="col">LCD 오른쪽</th><th scope="col">할 일</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">▼ 낮음</th><td>10 °C 미만</td><td>길게 2번</td><td><code>TLO</code></td><td>보온 커튼·난방 확인</td></tr>
+          <tr><th scope="row">● 적정</th><td>10–30 °C</td><td>울리지 않음</td><td>—</td><td>그대로 유지</td></tr>
+          <tr><th scope="row">▲ 높음</th><td>30 °C 이상</td><td>길게 3번</td><td><code>THI</code></td><td>환기·차광 (고온 장해 위험)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="small muted">습도 경보는 짧게, 온도 경보는 길게 울려 소리로 구별합니다. 색만으로 뜻을 전하지 않도록 모양(▼●▲)과 글자, 부저 횟수를 함께 씁니다. 같은 파랑이라도 계속 켜져 있으면 건조, 깜빡이면 센서 확인입니다. 경계에서 깜빡이지 않도록 2 %씩 여유를 둡니다(85 %에서 빨강 → 83 % 이하에서 초록).</p>
   </section>
 
   <section aria-labelledby="start">

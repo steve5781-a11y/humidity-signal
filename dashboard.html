@@ -1,0 +1,820 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>대시보드 · 딸기 하우스 습도 신호등</title>
+<link rel="stylesheet" href="assets/nav.css">
+<style>
+/* 레이아웃: 위 = 연결 / 왼쪽 = 지금 상태 / 오른쪽 = 설정 / 아래 = 추이·기록·도움말
+   색 토큰: 상태색(낮음·적정·높음)은 글자·모양과 함께만 씁니다 (WCAG 1.4.1) */
+:root{
+  --bg:#f6f7f3; --surface:#ffffff; --soft:#eef1ea; --line:#c9d0c5; --fg:#18211b; --muted:#4c5a50;
+  --brand:#1f5136; --brand-fg:#ffffff; --focus:#0b57d0;
+  --low:#a86b00;  --low-bg:#fff3cc;  --low-fg:#6b4300;
+  --ok:#1f7a3d;   --ok-bg:#e1f2e6;   --ok-fg:#14532b;
+  --high:#c62828; --high-bg:#fde4e2; --high-fg:#8a1414;
+  --warn-bg:#fff2d6; --warn-fg:#6b4300; --err-bg:#fde4e2; --err-fg:#8a1414;
+  --chart-grid:#d9ded5; --chart-line:#18211b;
+  --font:"Pretendard","Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;
+  --mono:ui-monospace,"Cascadia Mono",Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#121614; --surface:#1b211d; --soft:#232b25; --line:#3a463e; --fg:#e9efea; --muted:#aab8ae;
+  --brand:#8fd0a8; --brand-fg:#0d1a12; --focus:#8ab4ff;
+  --low:#f2c14e; --low-bg:#3d3010; --low-fg:#ffe7a6;
+  --ok:#6fd48f;  --ok-bg:#183524; --ok-fg:#c4f0d2;
+  --high:#ff8a80;--high-bg:#4a1f1d;--high-fg:#ffd2cd;
+  --warn-bg:#3d2f10; --warn-fg:#ffe2a6; --err-bg:#4a1f1d; --err-fg:#ffd2cd;
+  --chart-grid:#33403a; --chart-line:#e9efea; color-scheme:dark}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{font-size:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);font-size:1.0625rem;line-height:1.6}
+.skip{position:absolute;left:-9999px;top:8px;background:var(--surface);color:var(--fg);padding:8px 12px;border-radius:6px;z-index:10}
+.skip:focus{left:12px}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.wrap{max-width:1240px;margin:0 auto;padding:20px max(16px,3vw) 48px;display:grid;gap:20px}
+h1,h2,h3{margin:0;line-height:1.3}
+h1{font-size:clamp(1.5rem,2.6vw,2rem);font-weight:800;letter-spacing:-.01em}
+h2{font-size:1.2rem;font-weight:800}
+p{margin:0}
+.muted{color:var(--muted)}
+.small{font-size:.92rem}
+code,.mono{font-family:var(--mono);font-size:.92em}
+/* 머리말 */
+header.top{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;justify-content:space-between}
+.title{display:grid;gap:2px}
+.toplinks{display:flex;gap:8px;flex-wrap:wrap}
+/* 카드 */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;display:grid;gap:14px;min-width:0;align-content:start}
+.grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:20px}
+@media (max-width:860px){.grid{grid-template-columns:1fr}}
+/* 버튼·입력 */
+button,select,input{font:inherit;color:inherit}
+button,.btn{min-height:44px;padding:0 18px;border-radius:8px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:8px;color:var(--fg)}
+button.primary{background:var(--brand);border-color:var(--brand);color:var(--brand-fg)}
+button[aria-pressed="true"]{background:var(--soft);border-color:var(--brand)}
+button:disabled{opacity:.5;cursor:not-allowed}
+select,input[type=number],input[type=text]{min-height:44px;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:0 12px}
+input[type=number]{width:7.5rem;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;min-height:44px;accent-color:var(--brand)}
+input[aria-invalid="true"]{border-color:var(--high);border-width:2px}
+label{font-weight:700}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.field{display:grid;gap:6px}
+.hint{font-size:.9rem;color:var(--muted)}
+.error-text{font-size:.92rem;color:var(--err-fg);background:var(--err-bg);padding:6px 10px;border-radius:6px}
+/* 연결 막대 */
+.conn{display:flex;flex-wrap:wrap;gap:12px;align-items:end;justify-content:space-between}
+.conn .row{align-items:end}
+.pill{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:4px 14px;font-weight:700;font-size:.95rem;border:1px solid var(--line);background:var(--soft)}
+.pill .dot{width:10px;height:10px;border-radius:50%;background:var(--muted)}
+.pill[data-s="connected"] .dot{background:var(--ok)}
+.pill[data-s="stale"]{background:var(--warn-bg);color:var(--warn-fg)}
+.pill[data-s="stale"] .dot{background:#d08a00}
+.pill[data-s="error"]{background:var(--err-bg);color:var(--err-fg)}
+.pill[data-s="error"] .dot{background:var(--high)}
+.banner{border-radius:10px;padding:12px 16px;display:grid;gap:4px}
+.banner.warn{background:var(--warn-bg);color:var(--warn-fg)}
+.banner.err{background:var(--err-bg);color:var(--err-fg)}
+.banner.sim{background:var(--soft);border:1px dashed var(--line)}
+/* 지금 상태 */
+.now{display:grid;grid-template-columns:auto 1fr;gap:18px 24px;align-items:center}
+@media (max-width:520px){.now{grid-template-columns:1fr}}
+.reading{font-size:clamp(3.4rem,8vw,5.4rem);font-weight:800;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.reading small{font-size:.4em;font-weight:700;margin-left:4px}
+.level{display:inline-flex;align-items:center;gap:12px;border-radius:12px;padding:10px 18px;font-size:1.5rem;font-weight:800;border:2px solid transparent}
+.level svg{width:30px;height:30px;flex:none}
+.level[data-l="low"]{background:var(--low-bg);color:var(--low-fg);border-color:var(--low)}
+.level[data-l="ok"]{background:var(--ok-bg);color:var(--ok-fg);border-color:var(--ok)}
+.level[data-l="high"]{background:var(--high-bg);color:var(--high-fg);border-color:var(--high)}
+.level[data-l="none"]{background:var(--soft);color:var(--muted);border-color:var(--line)}
+.meaning{font-size:1.05rem}
+dl.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0}
+dl.facts div{background:var(--soft);border-radius:8px;padding:10px 12px;min-width:0}
+dl.facts dt{font-size:.85rem;color:var(--muted);font-weight:700}
+dl.facts dd{margin:0;font-weight:700;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.is-stale .reading,.is-stale .level{opacity:.55}
+/* 기준 막대 */
+.scale{display:grid;gap:6px}
+.scale-bar{position:relative;height:28px;border-radius:6px;overflow:hidden;display:flex;border:1px solid var(--line)}
+.scale-bar span{display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800}
+.scale-bar .b-low{background:var(--low-bg);color:var(--low-fg)}
+.scale-bar .b-ok{background:var(--ok-bg);color:var(--ok-fg)}
+.scale-bar .b-high{background:var(--high-bg);color:var(--high-fg)}
+.scale-marker{position:absolute;top:-4px;bottom:-4px;width:4px;background:var(--fg);border-radius:2px;transform:translateX(-2px)}
+.scale-ticks{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
+/* 그래프 */
+.chart{width:100%;height:auto;display:block}
+details summary{cursor:pointer;font-weight:700;min-height:44px;display:flex;align-items:center}
+.tablebox{overflow-x:auto;border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:.95rem}
+th,td{text-align:left;padding:8px 12px;border-top:1px solid var(--line)}
+thead th{background:var(--soft);border-top:0}
+/* 기록 */
+ol.log{list-style:none;margin:0;padding:0;display:grid;gap:4px;max-height:320px;overflow:auto}
+ol.log li{display:grid;grid-template-columns:5.5rem 1fr;gap:10px;padding:6px 8px;border-radius:6px}
+ol.log li:nth-child(odd){background:var(--soft)}
+ol.log time{font-family:var(--mono);font-size:.88rem;color:var(--muted)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.help dl{display:grid;gap:10px;margin:0}
+.help dt{font-weight:800}
+.help dd{margin:0 0 6px}
+@media (prefers-reduced-motion:no-preference){.level{transition:background-color .3s,border-color .3s}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">본문으로 건너뛰기</a>
+<nav class="site-nav" aria-label="사이트 메뉴"><ul><li class="brand">딸기 하우스 습도 신호등</li><li><a href="index.html">홈</a></li><li><a href="dashboard.html" aria-current="page">대시보드</a></li><li><a href="wiring.html">회로도</a></li><li><a href="options.html">옵션 추천</a></li><li><a href="design.html">설계 근거</a></li></ul></nav>
+<div class="wrap">
+
+<header class="top">
+  <div class="title">
+    <h1>딸기 하우스 습도 신호등</h1>
+    <p class="muted small">회로 P07 · DHT11 + RGB LED + LCD1602 + 부저 · 교육용 시제품</p>
+  </div>
+  <nav class="toplinks" aria-label="바로가기">
+    <a class="btn" href="#help">도움말</a>
+    <a class="btn" href="#log-title">기록</a>
+  </nav>
+</header>
+
+<section class="card" aria-labelledby="conn-title">
+  <h2 id="conn-title">보드 연결</h2>
+  <div class="conn">
+    <div class="row">
+      <div class="field">
+        <label for="mode">연결 방식</label>
+        <select id="mode">
+          <option value="serial">USB 직접 연결 (Chrome·Edge)</option>
+          <option value="bridge">PC 연결 프로그램 (브리지)</option>
+          <option value="sim">시뮬레이션 (보드 없이 시험)</option>
+        </select>
+      </div>
+      <div class="field" id="bridge-field" hidden>
+        <label for="bridge-url">브리지 주소</label>
+        <input id="bridge-url" type="text" value="ws://127.0.0.1:8765" spellcheck="false" autocomplete="off">
+      </div>
+      <button id="connect" class="primary" type="button">연결하기</button>
+      <button id="disconnect" type="button" disabled>연결 끊기</button>
+    </div>
+    <p class="pill" id="conn-pill" data-s="idle"><span class="dot" aria-hidden="true"></span><span id="conn-text">연결 안 됨</span></p>
+  </div>
+  <p class="hint" id="mode-hint">보드를 USB로 꽂은 뒤 "연결하기"를 누르고 포트를 고르세요. Arduino 시리얼 모니터가 열려 있으면 먼저 닫으세요.</p>
+  <div id="banner-area" class="grid" style="grid-template-columns:1fr"></div>
+</section>
+
+<main id="main" class="grid">
+  <section class="card" id="now-card" aria-labelledby="now-title">
+    <div class="row" style="justify-content:space-between">
+      <h2 id="now-title">지금 습도</h2>
+      <button id="pause" type="button" aria-pressed="false">화면 갱신 멈춤</button>
+    </div>
+    <div class="now">
+      <p class="reading" id="rh-value" aria-describedby="rh-updated">--<small>%</small></p>
+      <div style="display:grid;gap:10px">
+        <p class="level" id="level" data-l="none"><span id="level-icon" aria-hidden="true"></span><span id="level-text">값 없음</span></p>
+        <p class="meaning" id="level-meaning">보드를 연결하면 습도와 상태가 여기에 표시됩니다.</p>
+      </div>
+    </div>
+    <div class="scale" aria-hidden="true">
+      <div class="scale-bar" id="scale-bar">
+        <span class="b-low" id="b-low">낮음</span><span class="b-ok" id="b-ok">적정</span><span class="b-high" id="b-high">높음</span>
+        <i class="scale-marker" id="scale-marker" hidden></i>
+      </div>
+      <div class="scale-ticks"><span>0%</span><span id="tick-low">60%</span><span id="tick-high">85%</span><span>100%</span></div>
+    </div>
+    <dl class="facts">
+      <div><dt>온도</dt><dd id="t-value">--</dd></div>
+      <div><dt>마지막 수신</dt><dd id="rh-updated">아직 없음</dd></div>
+      <div><dt>보드 신호등 출력</dt><dd id="rgb-state">--</dd></div>
+      <div><dt>LCD</dt><dd id="lcd-state">--</dd></div>
+      <div><dt>부저 경보</dt><dd id="buzz-state">--</dd></div>
+    </dl>
+    <p class="hint">"보드 신호등 출력"은 보드가 낸 명령값입니다. LED가 실제로 그 색으로 켜졌는지는 눈으로 확인하세요.</p>
+  </section>
+
+  <section class="card" aria-labelledby="set-title">
+    <h2 id="set-title">기준과 신호등 설정</h2>
+    <form id="rh-form" novalidate>
+      <fieldset style="border:0;padding:0;margin:0;display:grid;gap:12px">
+        <legend class="sr">습도 기준</legend>
+        <div class="row">
+          <div class="field">
+            <label for="rh-low">낮음 기준 (%)</label>
+            <input id="rh-low" name="rh-low" type="number" inputmode="numeric" min="1" max="99" step="1" value="60" aria-describedby="rh-low-hint rh-low-err">
+            <span class="hint" id="rh-low-hint">이 값 미만이면 노랑</span>
+          </div>
+          <div class="field">
+            <label for="rh-high">높음 기준 (%)</label>
+            <input id="rh-high" name="rh-high" type="number" inputmode="numeric" min="1" max="99" step="1" value="85" aria-describedby="rh-high-hint rh-high-err">
+            <span class="hint" id="rh-high-hint">이 값 이상이면 빨강</span>
+          </div>
+        </div>
+        <p class="error-text" id="rh-low-err" hidden></p>
+        <p class="error-text" id="rh-high-err" hidden></p>
+        <p class="hint">딸기 초기값: 낮음 60 %, 높음 85 %. 두 기준은 4 % 이상 떨어져 있어야 합니다(경계 여유 2 %씩).</p>
+        <div class="row">
+          <button type="submit" class="primary" id="rh-apply">기준 적용</button>
+          <button type="button" id="rh-reset">딸기 초기값으로</button>
+        </div>
+        <p class="hint" id="rh-result" role="status"></p>
+      </fieldset>
+    </form>
+    <hr style="border:0;border-top:1px solid var(--line);margin:0">
+    <div class="field">
+      <label for="bright">RGB 밝기 (0–255)</label>
+      <div class="row">
+        <input id="bright" type="number" inputmode="numeric" min="0" max="255" step="5" value="80" aria-describedby="bright-hint">
+        <button type="button" id="bright-apply">밝기 적용</button>
+      </div>
+      <span class="hint" id="bright-hint">교실 시연은 60–120이 눈부시지 않습니다.</span>
+    </div>
+    <div class="row">
+      <button type="button" id="light-toggle" aria-pressed="true">신호등 켜짐</button>
+      <button type="button" id="buzz-toggle" aria-pressed="true">보드 부저 켜짐</button>
+      <button type="button" id="sound-toggle" aria-pressed="false">화면 알림음 꺼짐</button>
+    </div>
+    <p class="hint" id="ctrl-note">보드가 연결되면 설정을 바꿀 수 있습니다.</p>
+    <div id="sim-controls" class="banner sim" hidden>
+      <strong>시뮬레이션 조작</strong>
+      <p class="small">실제 보드 대신 가상 보드가 같은 규약으로 답합니다. 화면의 값은 실제 측정이 아닙니다.</p>
+      <div class="row">
+        <button type="button" data-sim="up">입김 불기 (+12 %)</button>
+        <button type="button" data-sim="down">마른 바람 (−12 %)</button>
+        <button type="button" data-sim="fail" aria-pressed="false">센서 오류 흉내</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" style="grid-column:1/-1" aria-labelledby="trend-title">
+    <div class="row" style="justify-content:space-between">
+      <h2 id="trend-title">최근 10분 추이</h2>
+      <p class="hint" id="trend-summary">기록 없음</p>
+    </div>
+    <svg class="chart" id="chart" viewBox="0 0 960 300" role="img" aria-labelledby="chart-title chart-desc">
+      <title id="chart-title">최근 10분 습도 그래프</title>
+      <desc id="chart-desc">아직 기록이 없습니다.</desc>
+    </svg>
+    <details>
+      <summary>그래프 값을 표로 보기 (최근 20개)</summary>
+      <div class="tablebox"><table>
+        <thead><tr><th scope="col">시각</th><th scope="col">습도</th><th scope="col">온도</th><th scope="col">상태</th></tr></thead>
+        <tbody id="trend-table"><tr><td colspan="4">기록 없음</td></tr></tbody>
+      </table></div>
+    </details>
+  </section>
+
+  <section class="card" aria-labelledby="log-title">
+    <div class="row" style="justify-content:space-between">
+      <h2 id="log-title">기록</h2>
+      <button type="button" id="csv">측정 기록 CSV 저장</button>
+    </div>
+    <p class="hint" id="csv-note">이 탭이 열려 있는 동안 받은 측정값을 저장합니다. 탭을 닫으면 사라집니다.</p>
+    <ol class="log" id="log" tabindex="0" aria-label="상태 변화와 명령 결과, 최신순"></ol>
+  </section>
+
+  <section class="card help" id="help" aria-labelledby="help-title">
+    <h2 id="help-title">도움말</h2>
+    <dl>
+      <dt>색과 모양의 뜻</dt>
+      <dd>▼ 노랑 낮음 = 건조(증산 과다, 잎 끝 마름 주의) · ● 초록 적정 · ▲ 빨강 높음 = 과습(잿빛곰팡이병 위험, 환기 필요). 같은 뜻이 글자로도 표시됩니다.</dd>
+      <dt>왜 경계에서 바로 색이 안 바뀌나요?</dt>
+      <dd>85 %에서 빨강이 된 뒤에는 83 % 이하로 내려가야 초록으로 돌아갑니다(낮음 쪽은 60 % / 62 %). 센서 값이 경계에서 흔들릴 때 신호가 깜빡이지 않게 하는 여유 구간입니다.</dd>
+      <dt>부저는 언제 울리나요?</dt>
+      <dd>적정에서 낮음으로 바뀌면 2번, 높음으로 바뀌면 3번 짧게 울립니다. 같은 상태가 이어지면 다시 울리지 않고, 적정일 때는 울리지 않습니다. "보드 부저" 버튼으로 끌 수 있고, "화면 알림음"은 이 PC에서만 나는 소리라 보드 부저와 따로 켜고 끕니다.</dd>
+      <dt>"값 없음"과 0 %는 다릅니다</dt>
+      <dd>센서를 읽지 못하면 0이 아니라 "값 없음"으로 표시하고 보드 신호등은 파랑으로 켭니다. 3초 넘게 보드 소식이 없으면 "응답 없음"을 표시하고 설정 버튼을 잠급니다. 이때 LED가 꺼졌다고 가정하지 않습니다.</dd>
+      <dt>연결이 안 될 때</dt>
+      <dd>데이터용 USB 케이블인지, 보드에 P07 코드가 올라가 있는지, Arduino 시리얼 모니터가 닫혀 있는지 확인하세요. USB 직접 연결은 Chrome·Edge에서만 됩니다. 다른 브라우저는 PC 연결 프로그램(브리지)을 쓰세요.</dd>
+      <dt>측정 정확도</dt>
+      <dd>DHT11은 습도 ±5 %, 온도 ±2 °C 정도의 오차가 있는 교육용 센서입니다. 실제 재배 판단에는 검증된 센서를 쓰세요.</dd>
+    </dl>
+  </section>
+</main>
+
+<div class="sr" aria-live="polite" id="announcer"></div>
+</div>
+
+<script>
+"use strict";
+/* ================= 설정 ================= */
+const PROFILE = "P07";
+const STALE_MS = 3000;          // 이 시간 동안 상태가 없으면 '응답 없음'
+const ACK_TIMEOUT_MS = 3000;    // 명령 응답 대기
+const HISTORY_MS = 10 * 60 * 1000;
+const STRAWBERRY = { low: 60, high: 85 };
+const HYST = 2;
+
+const LEVELS = {
+  low:  { text: "낮음", color: "노랑", meaning: "건조합니다. 증산이 많아 잎 끝이 마를 수 있어요. 관수·차광·환기 조절을 확인하세요." },
+  ok:   { text: "적정", color: "초록", meaning: "딸기 관리 범위 안입니다." },
+  high: { text: "높음", color: "빨강", meaning: "과습입니다. 잿빛곰팡이병 위험이 커져요. 환기가 필요합니다." },
+  none: { text: "값 없음", color: "파랑", meaning: "센서 값을 받지 못했습니다." },
+};
+const ICONS = { // 색 말고도 모양으로 구분
+  low:  '<svg viewBox="0 0 30 30"><path d="M4 8h22L15 25z" fill="currentColor"/></svg>',
+  ok:   '<svg viewBox="0 0 30 30"><circle cx="15" cy="15" r="11" fill="currentColor"/></svg>',
+  high: '<svg viewBox="0 0 30 30"><path d="M4 23h22L15 5z" fill="currentColor"/></svg>',
+  none: '<svg viewBox="0 0 30 30"><circle cx="15" cy="15" r="10" fill="none" stroke="currentColor" stroke-width="3" stroke-dasharray="4 3"/></svg>',
+};
+const ERRORS = {
+  out_of_range: "허용 범위를 벗어났습니다. 습도 기준은 1–99 %, 밝기는 0–255입니다.",
+  low_not_below_high: "낮음 기준이 높음 기준보다 작아야 합니다.",
+  gap_too_small: "두 기준이 4 % 이상 떨어져 있어야 합니다.",
+  unknown_setting: "보드가 모르는 설정입니다.",
+  bad_args: "명령 형식이 맞지 않습니다.",
+  bad_request: "요청 번호가 잘못되었습니다.",
+  unknown_command: "보드가 모르는 명령입니다. 보드에 P07 코드가 올라가 있는지 확인하세요.",
+  line_too_long: "명령이 너무 깁니다.",
+  timeout: "3초 안에 보드 응답이 없었습니다. 적용 여부를 상태 값으로 확인하세요. 자동으로 다시 보내지 않습니다.",
+  not_connected: "보드가 연결되어 있지 않습니다.",
+};
+
+/* ================= 화면 요소 ================= */
+const $ = (id) => document.getElementById(id);
+const els = {
+  mode: $("mode"), bridgeField: $("bridge-field"), bridgeUrl: $("bridge-url"),
+  connect: $("connect"), disconnect: $("disconnect"), pill: $("conn-pill"), connText: $("conn-text"),
+  modeHint: $("mode-hint"), banners: $("banner-area"), nowCard: $("now-card"),
+  rh: $("rh-value"), level: $("level"), levelText: $("level-text"), levelIcon: $("level-icon"),
+  meaning: $("level-meaning"), t: $("t-value"), updated: $("rh-updated"), rgb: $("rgb-state"), lcd: $("lcd-state"),
+  bLow: $("b-low"), bOk: $("b-ok"), bHigh: $("b-high"), marker: $("scale-marker"), tickLow: $("tick-low"), tickHigh: $("tick-high"),
+  form: $("rh-form"), low: $("rh-low"), high: $("rh-high"), lowErr: $("rh-low-err"), highErr: $("rh-high-err"),
+  rhApply: $("rh-apply"), rhReset: $("rh-reset"), rhResult: $("rh-result"),
+  bright: $("bright"), brightApply: $("bright-apply"), light: $("light-toggle"), sound: $("sound-toggle"), buzz: $("buzz-toggle"), buzzState: $("buzz-state"),
+  ctrlNote: $("ctrl-note"), sim: $("sim-controls"), pause: $("pause"),
+  chart: $("chart"), chartDesc: $("chart-desc"), trendSummary: $("trend-summary"), trendTable: $("trend-table"),
+  log: $("log"), csv: $("csv"), announcer: $("announcer"),
+};
+
+/* ================= 상태 ================= */
+const app = {
+  transport: null, connected: false, lastStateAt: 0, state: null, profileOk: true,
+  history: [], records: [], pending: new Map(), nextId: 100,
+  lastLevel: undefined, formDirty: false, paused: false, sound: false, audio: null,
+};
+
+/* ================= 연결 방식(전송) ================= */
+// 공통 모양: connect(), send(line), close(); onLine(text), onStatus(kind, detail)
+class SerialTransport {
+  constructor(h) { this.h = h; this.port = null; this.reader = null; this.writer = null; this.closing = false; }
+  async connect() {
+    if (!("serial" in navigator)) throw new Error("이 브라우저는 USB 직접 연결(Web Serial)을 지원하지 않습니다. Chrome·Edge를 쓰거나 브리지를 고르세요.");
+    this.port = await navigator.serial.requestPort();
+    await this.port.open({ baudRate: 115200 });
+    const enc = new TextEncoderStream(); enc.readable.pipeTo(this.port.writable).catch(() => {});
+    this.writer = enc.writable.getWriter();
+    this.h.onStatus("opening", "보드가 재시작하는 2초 동안 기다립니다.");
+    this.readLoop();
+    await new Promise((r) => setTimeout(r, 2000));
+    this.h.onStatus("open");
+  }
+  async readLoop() {
+    const dec = new TextDecoderStream();
+    this.port.readable.pipeTo(dec.writable).catch(() => {});
+    this.reader = dec.readable.getReader();
+    let buf = "";
+    try {
+      for (;;) {
+        const { value, done } = await this.reader.read();
+        if (done) break;
+        buf += value;
+        let i;
+        while ((i = buf.indexOf("\n")) >= 0) { const line = buf.slice(0, i).trim(); buf = buf.slice(i + 1); if (line) this.h.onLine(line); }
+        if (buf.length > 4096) buf = "";
+      }
+    } catch (e) { if (!this.closing) this.h.onStatus("error", "USB 연결이 끊겼습니다: " + e.message); }
+  }
+  send(line) { return this.writer.write(line + "\n"); }
+  async close() {
+    this.closing = true;
+    try { await this.reader?.cancel(); } catch {}
+    try { await this.writer?.close(); } catch {}
+    try { await this.port?.close(); } catch {}
+  }
+}
+
+class BridgeTransport {
+  constructor(h, url) { this.h = h; this.url = url; this.ws = null; this.closing = false; }
+  connect() {
+    return new Promise((resolve, reject) => {
+      let opened = false;
+      this.ws = new WebSocket(this.url);
+      this.ws.onopen = () => { opened = true; this.h.onStatus("open"); resolve(); };
+      this.ws.onerror = () => { if (!opened) reject(new Error("브리지에 접속하지 못했습니다. PC 연결 프로그램이 실행 중인지, 주소가 맞는지 확인하세요.")); };
+      this.ws.onclose = () => { if (opened && !this.closing) this.h.onStatus("error", "브리지 연결이 끊겼습니다."); };
+      this.ws.onmessage = (ev) => this.h.onLine(String(ev.data));
+    });
+  }
+  send(line) { this.ws.send(line); return Promise.resolve(); }
+  close() { this.closing = true; try { this.ws?.close(); } catch {} return Promise.resolve(); }
+}
+
+// 가상 보드: 보드 코드(logic.h)와 같은 규칙으로 답합니다.
+class SimTransport {
+  constructor(h) { this.h = h; this.timer = null; this.rh = 70; this.t = 22.5; this.fail = false; this.fails = 0;
+    this.low = 60; this.high = 85; this.bright = 80; this.light = true; this.buzz = true; this.level = null; this.valid = false; this.ms = 0; this.dhtTick = 0; this.seen = false; }
+  connect() { this.h.onStatus("open"); this.timer = setInterval(() => this.tick(), 1000); return Promise.resolve(); }
+  classify(prev) {
+    if (!this.valid) return null;
+    const plain = () => this.rh < this.low ? "low" : this.rh >= this.high ? "high" : "ok";
+    if (prev === "high" && this.rh > this.high - HYST) return "high";
+    if (prev === "low" && this.rh < this.low + HYST) return "low";
+    return plain();
+  }
+  rgb() { if (!this.light) return [0, 0, 0]; if (!this.level) return [0, 0, this.bright]; return this.level === "low" ? [this.bright, this.bright >> 1, 0] : this.level === "ok" ? [0, this.bright, 0] : [this.bright, 0, 0]; }
+  tick() {
+    this.ms += 1000;
+    if (++this.dhtTick % 2 === 0) { // 2초마다 측정
+      if (this.fail) { this.fails++; if (this.fails >= 2) this.valid = false; }
+      else { this.fails = 0; this.valid = true; this.seen = true;
+        this.rh = Math.min(99, Math.max(20, this.rh + (Math.random() - 0.5) * 1.6));
+        this.t = Math.round((this.t + (Math.random() - 0.5) * 0.2) * 10) / 10; }
+      this.level = this.classify(this.level);
+    }
+    this.emitState(0);
+  }
+  emitState(req) {
+    const v = this.valid, s = { v: 1, type: "state", profile: PROFILE, request: req, ms: this.ms,
+      humidity_pct: v ? Math.round(this.rh * 10) / 10 : null, temperature_c: v ? this.t : null,
+      rh_level: this.level, rh_low: this.low, rh_high: this.high, light_on: this.light, bright: this.bright,
+      rgb: this.rgb(), dht_fail_count: this.fails, buzzer_on: this.buzz, lcd_ready: true };
+    setTimeout(() => this.h.onLine(JSON.stringify(s)), 30);
+  }
+  reply(o) { setTimeout(() => this.h.onLine(JSON.stringify(Object.assign({ v: 1 }, o))), 60); }
+  send(line) {
+    const tok = line.trim().split(/\s+/); const req = Number(tok[0]); const cmd = (tok[1] || "").toUpperCase();
+    const ints = tok.slice(2).map((x) => (/^-?\d+$/.test(x) ? Number(x) : NaN));
+    if (!(req >= 1 && req <= 65535)) { this.reply({ type: "error", request: 0, code: "bad_request" }); return Promise.resolve(); }
+    const ack = () => this.reply({ type: "ack", request: req, applied: true });
+    const err = (code) => this.reply({ type: "error", request: req, code });
+    if (cmd === "STATUS") this.emitState(req);
+    else if (cmd === "PING") ack();
+    else if (cmd === "STOP") { this.light = false; ack(); }
+    else if (cmd === "LIGHT") { if (ints[0] !== 0 && ints[0] !== 1) err("out_of_range"); else { this.light = ints[0] === 1; ack(); } }
+    else if (cmd === "BUZZ") { if (ints[0] !== 0 && ints[0] !== 1) err("out_of_range"); else { this.buzz = ints[0] === 1; ack(); } }
+    else if (cmd === "BRIGHT") { if (!(ints[0] >= 0 && ints[0] <= 255)) err("out_of_range"); else { this.bright = ints[0]; ack(); } }
+    else if (cmd === "SET") {
+      const [a, b] = [ints[1], ints[2]];
+      if ((tok[2] || "").toUpperCase() !== "RH") err("unknown_setting");
+      else if (!(a >= 1 && a <= 99 && b >= 1 && b <= 99)) err("out_of_range");
+      else if (a >= b) err("low_not_below_high");
+      else if (b - a < 2 * HYST) err("gap_too_small");
+      else { this.low = a; this.high = b; this.level = this.classify(null); ack(); }
+    } else err("unknown_command");
+    return Promise.resolve();
+  }
+  nudge(d) { this.rh = Math.min(99, Math.max(20, this.rh + d)); }
+  close() { clearInterval(this.timer); return Promise.resolve(); }
+}
+
+/* ================= 연결 흐름 ================= */
+const handlers = {
+  onLine: (text) => handleLine(text),
+  onStatus: (kind, detail) => {
+    if (kind === "opening") setConn("connecting", "연결 중… " + (detail || ""));
+    if (kind === "open") {
+      if (app.transport instanceof BridgeTransport) setConn("connecting", "브리지 접속됨 · 보드 포트 확인 중");
+      else setConn("connected", "연결됨 · 상태 확인 중");
+      sendCommand("STATUS", { quiet: true });
+    }
+    if (kind === "error") { app.connected = false; setConn("error", detail || "연결 오류"); updateControls(); addLog(detail || "연결 오류"); }
+  },
+};
+
+els.mode.addEventListener("change", () => {
+  const m = els.mode.value;
+  els.bridgeField.hidden = m !== "bridge";
+  els.modeHint.textContent = {
+    serial: "보드를 USB로 꽂은 뒤 \"연결하기\"를 누르고 포트를 고르세요. Arduino 시리얼 모니터가 열려 있으면 먼저 닫으세요.",
+    bridge: "PC에서 bridge.py를 먼저 실행한 뒤 \"연결하기\"를 누르세요. 다른 브라우저나 여러 탭에서도 같은 보드를 볼 수 있습니다.",
+    sim: "보드 없이 화면과 규칙을 시험합니다. 표시되는 값은 실제 측정이 아닙니다.",
+  }[m];
+});
+
+els.connect.addEventListener("click", async () => {
+  const m = els.mode.value;
+  app.transport = m === "serial" ? new SerialTransport(handlers) : m === "bridge" ? new BridgeTransport(handlers, els.bridgeUrl.value.trim()) : new SimTransport(handlers);
+  els.connect.disabled = true; els.mode.disabled = true;
+  setConn("connecting", "연결 중…");
+  try {
+    await app.transport.connect();
+    app.connected = true; app.source = m;
+    els.disconnect.disabled = false;
+    els.sim.hidden = m !== "sim";
+    showBanner(m === "sim" ? { kind: "sim", title: "시뮬레이션 중", text: "가상 보드의 값입니다. 실제 측정이 아닙니다." } : null);
+    addLog(m === "sim" ? "시뮬레이션 시작" : "연결됨 (" + els.mode.selectedOptions[0].textContent + ")");
+  } catch (e) {
+    app.transport = null; els.connect.disabled = false; els.mode.disabled = false;
+    const msg = e && e.name === "NotFoundError" ? "포트를 고르지 않았습니다. 다시 \"연결하기\"를 눌러 보드 포트를 고르세요." : (e.message || String(e));
+    setConn("error", "연결 실패"); showBanner({ kind: "err", title: "연결하지 못했습니다", text: msg }); addLog("연결 실패: " + msg);
+  }
+  updateControls();
+});
+
+els.disconnect.addEventListener("click", async () => {
+  await app.transport?.close(); app.transport = null; app.connected = false;
+  for (const p of app.pending.values()) clearTimeout(p.timer); app.pending.clear();
+  app.state = null; app.lastStateAt = 0; app.lastLevel = undefined; app.history = []; renderChart();
+  els.connect.disabled = false; els.mode.disabled = false; els.disconnect.disabled = true; els.sim.hidden = true;
+  setConn("idle", "연결 안 됨"); showBanner(null); addLog("연결 끊음"); updateControls(); renderNow();
+});
+
+function setConn(s, text) { els.pill.dataset.s = s; els.connText.textContent = text; }
+
+function showBanner(b) {
+  els.banners.textContent = "";
+  if (!b) return;
+  const d = document.createElement("div"); d.className = "banner " + b.kind;
+  const t = document.createElement("strong"); t.textContent = b.title; const p = document.createElement("p"); p.textContent = b.text;
+  d.append(t, p); els.banners.append(d);
+}
+
+/* ================= 받은 줄 처리 ================= */
+function handleLine(text) {
+  let msg;
+  try { msg = JSON.parse(text); } catch { addLog("JSON이 아닌 줄: " + text.slice(0, 60)); return; } // 9600 단품 예제 출력 등
+  if (msg.type === "state") {
+    // STATUS 응답은 state 형식으로 오므로 대기 목록에서 지웁니다.
+    const p = msg.request ? app.pending.get(msg.request) : null;
+    if (p) { clearTimeout(p.timer); app.pending.delete(msg.request); p.resolve({ ok: true }); }
+    onState(msg);
+  }
+  else if (msg.type === "ack" || msg.type === "error") onReply(msg);
+  else if (msg.type === "bridge") onBridge(msg);
+}
+
+function onBridge(m) {
+  if (m.status === "serial_open") { setConn("connected", "연결됨 (브리지 · " + m.port + ")"); sendCommand("STATUS", { quiet: true }); }
+  else if (m.status === "serial_opening") setConn("connecting", "브리지가 " + m.port + " 여는 중…");
+  else if (m.status === "serial_error") { setConn("error", "브리지: 포트 오류"); showBanner({ kind: "err", title: "브리지가 보드 포트를 열지 못했습니다", text: (m.detail || "") + " — 시리얼 모니터가 열려 있는지, 포트 이름이 맞는지 확인하세요. 3초마다 다시 시도합니다." }); }
+  else if (m.status === "serial_not_open") addLog("브리지: 아직 보드 포트가 열리지 않아 명령을 보내지 못했습니다.");
+  else if (m.status === "rejected") addLog("브리지가 형식이 틀린 명령을 거절했습니다: " + m.detail);
+}
+
+function onState(s) {
+  app.lastStateAt = Date.now();
+  if (s.profile !== PROFILE) {
+    app.profileOk = false;
+    showBanner({ kind: "err", title: "다른 회로 코드가 올라가 있습니다", text: `보드가 ${s.profile ?? "알 수 없음"}을(를) 보냈습니다. P07.ino를 업로드한 뒤 다시 연결하세요.` });
+    updateControls(); return;
+  }
+  if (!app.profileOk) { app.profileOk = true; showBanner(null); }
+  app.state = s;
+  const now = Date.now();
+  const rec = { at: now, rh: s.humidity_pct, t: s.temperature_c, level: s.rh_level, low: s.rh_low, high: s.rh_high, src: app.source };
+  app.history.push(rec); while (app.history.length && now - app.history[0].at > HISTORY_MS) app.history.shift();
+  if (app.records.length < 86400) app.records.push(rec);
+  const lv = s.rh_level ?? "none";
+  if (app.lastLevel !== undefined && lv !== app.lastLevel) {
+    const L = LEVELS[lv];
+    const msg = lv === "none" ? "센서 값을 받지 못했습니다. 보드 신호등은 파랑으로 켭니다." : `습도 ${fmt(s.humidity_pct)}% · ${L.text} (${L.color})`;
+    addLog("상태 변화: " + msg); announce(msg);
+    if (app.sound && (lv === "high" || lv === "low")) beep(lv);
+  }
+  app.lastLevel = lv;
+  if (!app.formDirty) { els.low.value = s.rh_low; els.high.value = s.rh_high; }
+  if (document.activeElement !== els.bright) els.bright.value = s.bright;
+  els.light.setAttribute("aria-pressed", String(!!s.light_on));
+  els.light.textContent = s.light_on ? "신호등 켜짐" : "신호등 꺼짐";
+  els.buzz.setAttribute("aria-pressed", String(s.buzzer_on !== false));
+  els.buzz.textContent = s.buzzer_on === false ? "보드 부저 꺼짐" : "보드 부저 켜짐";
+  if (!isStale()) setConn("connected", app.source === "sim" ? "연결됨 (시뮬레이션)" : app.source === "bridge" ? "연결됨 (브리지)" : "연결됨 (USB)");
+  updateControls();
+  if (!app.paused) { renderNow(); renderChart(); }
+}
+
+/* ================= 명령 보내기 ================= */
+function sendCommand(body, opts = {}) {
+  return new Promise((resolve) => {
+    if (!app.connected || !app.transport) { resolve({ ok: false, code: "not_connected" }); return; }
+    const id = app.nextId; app.nextId = app.nextId >= 65535 ? 100 : app.nextId + 1;
+    const line = `${id} ${body}`;
+    const timer = setTimeout(() => { app.pending.delete(id); if (!opts.quiet) addLog(`응답 없음: ${body}`); resolve({ ok: false, code: "timeout" }); }, ACK_TIMEOUT_MS);
+    app.pending.set(id, { body, timer, resolve, quiet: opts.quiet });
+    app.transport.send(line).catch((e) => { clearTimeout(timer); app.pending.delete(id); resolve({ ok: false, code: "not_connected", detail: e.message }); });
+    if (!opts.quiet) addLog(`보냄: ${body}`);
+  });
+}
+function onReply(m) {
+  const p = app.pending.get(m.request); if (!p) return;
+  clearTimeout(p.timer); app.pending.delete(m.request);
+  if (m.type === "ack") { if (!p.quiet) addLog(`적용됨: ${p.body}`); p.resolve({ ok: true }); }
+  else { addLog(`거절됨: ${p.body} — ${ERRORS[m.code] || m.code}`); p.resolve({ ok: false, code: m.code }); }
+}
+
+/* ================= 설정 폼 ================= */
+function validateForm() {
+  const low = els.low.value.trim(), high = els.high.value.trim();
+  const errs = { low: "", high: "" };
+  const isInt = (v) => /^\d{1,2}$/.test(v);
+  if (!isInt(low) || +low < 1 || +low > 99) errs.low = "낮음 기준에 1부터 99 사이의 정수를 입력하세요.";
+  if (!isInt(high) || +high < 1 || +high > 99) errs.high = "높음 기준에 1부터 99 사이의 정수를 입력하세요.";
+  if (!errs.low && !errs.high) {
+    if (+low >= +high) errs.high = `높음 기준(${high} %)이 낮음 기준(${low} %)보다 커야 합니다.`;
+    else if (+high - +low < 2 * HYST) errs.high = `두 기준의 차이가 ${+high - +low} %입니다. 4 % 이상 떨어뜨려 주세요.`;
+  }
+  setFieldError(els.low, els.lowErr, errs.low); setFieldError(els.high, els.highErr, errs.high);
+  return errs.low || errs.high ? null : { low: +low, high: +high };
+}
+function setFieldError(input, box, msg) { input.setAttribute("aria-invalid", msg ? "true" : "false"); box.hidden = !msg; box.textContent = msg; }
+
+els.low.addEventListener("input", () => { app.formDirty = true; });
+els.high.addEventListener("input", () => { app.formDirty = true; });
+els.form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const v = validateForm();
+  if (!v) { (els.low.getAttribute("aria-invalid") === "true" ? els.low : els.high).focus(); els.rhResult.textContent = "입력값을 확인하세요."; return; }
+  els.rhResult.textContent = "보드에 보내는 중…"; els.rhApply.disabled = true;
+  const r = await sendCommand(`SET RH ${v.low} ${v.high}`);
+  els.rhApply.disabled = false; updateControls();
+  if (r.ok) { app.formDirty = false; els.rhResult.textContent = `보드에 적용됨: 낮음 ${v.low} % · 높음 ${v.high} %`; }
+  else els.rhResult.textContent = "적용되지 않았습니다. " + (ERRORS[r.code] || r.code);
+});
+els.rhReset.addEventListener("click", () => {
+  els.low.value = STRAWBERRY.low; els.high.value = STRAWBERRY.high; app.formDirty = true; validateForm();
+  els.rhResult.textContent = "딸기 초기값을 넣었습니다. \"기준 적용\"을 눌러야 보드에 반영됩니다.";
+});
+
+els.brightApply.addEventListener("click", async () => {
+  const v = els.bright.value.trim();
+  if (!/^\d{1,3}$/.test(v) || +v > 255) { els.ctrlNote.textContent = "밝기는 0부터 255 사이의 정수로 입력하세요."; els.bright.focus(); return; }
+  const r = await sendCommand(`BRIGHT ${+v}`);
+  els.ctrlNote.textContent = r.ok ? `밝기 ${v} 적용됨` : "적용되지 않았습니다. " + (ERRORS[r.code] || r.code);
+});
+els.light.addEventListener("click", async () => {
+  const on = els.light.getAttribute("aria-pressed") !== "true";
+  const r = await sendCommand(`LIGHT ${on ? 1 : 0}`);
+  els.ctrlNote.textContent = r.ok ? (on ? "신호등을 켰습니다." : "신호등을 껐습니다. 측정은 계속됩니다.") : "적용되지 않았습니다. " + (ERRORS[r.code] || r.code);
+});
+els.buzz.addEventListener("click", async () => {
+  const on = els.buzz.getAttribute("aria-pressed") !== "true";
+  const r = await sendCommand(`BUZZ ${on ? 1 : 0}`);
+  els.ctrlNote.textContent = r.ok ? (on ? "보드 부저를 켰습니다. 낮음·높음으로 바뀔 때 울립니다." : "보드 부저를 껐습니다. 신호등과 측정은 계속됩니다.") : "적용되지 않았습니다. " + (ERRORS[r.code] || r.code);
+});
+els.sound.addEventListener("click", () => {
+  app.sound = !app.sound;
+  els.sound.setAttribute("aria-pressed", String(app.sound)); els.sound.textContent = app.sound ? "화면 알림음 켜짐" : "화면 알림음 꺼짐";
+  if (app.sound && !app.audio) { try { app.audio = new (window.AudioContext || window.webkitAudioContext)(); } catch {} }
+});
+els.pause.addEventListener("click", () => {
+  app.paused = !app.paused;
+  els.pause.setAttribute("aria-pressed", String(app.paused)); els.pause.textContent = app.paused ? "화면 갱신 다시 시작" : "화면 갱신 멈춤";
+  if (!app.paused) { renderNow(); renderChart(); }
+  announce(app.paused ? "화면 갱신을 멈췄습니다. 기록은 계속됩니다." : "화면 갱신을 다시 시작했습니다.");
+});
+els.sim.addEventListener("click", (e) => {
+  const b = e.target.closest("button[data-sim]"); if (!b || !(app.transport instanceof SimTransport)) return;
+  if (b.dataset.sim === "up") app.transport.nudge(12);
+  if (b.dataset.sim === "down") app.transport.nudge(-12);
+  if (b.dataset.sim === "fail") { app.transport.fail = !app.transport.fail; b.setAttribute("aria-pressed", String(app.transport.fail)); }
+});
+
+function updateControls() {
+  const stale = isStale();
+  const usable = app.connected && app.profileOk && !stale && !!app.state;
+  for (const b of [els.rhApply, els.brightApply, els.light, els.buzz]) b.disabled = !usable;
+  if (!app.connected) els.ctrlNote.textContent = "보드가 연결되면 설정을 바꿀 수 있습니다.";
+  else if (stale) els.ctrlNote.textContent = "보드 응답이 없어 설정 버튼을 잠갔습니다.";
+  else if (!app.profileOk) els.ctrlNote.textContent = "P07 코드가 아니어서 설정 버튼을 잠갔습니다.";
+}
+
+/* ================= 그리기 ================= */
+const fmt = (v, d = 0) => (v === null || v === undefined || Number.isNaN(v) ? "--" : Number(v).toFixed(d));
+function isStale() { return app.connected && app.lastStateAt > 0 && Date.now() - app.lastStateAt > STALE_MS; }
+
+function renderNow() {
+  const s = app.state;
+  const lv = s && app.connected ? (s.rh_level ?? "none") : "none";
+  const L = LEVELS[lv];
+  els.rh.firstChild.nodeValue = s && app.connected ? fmt(s.humidity_pct) : "--";
+  els.level.dataset.l = lv; els.levelText.textContent = s && app.connected ? `${L.text} · ${L.color}` : "값 없음";
+  els.levelIcon.innerHTML = ICONS[lv];
+  els.meaning.textContent = !app.connected ? "보드를 연결하면 습도와 상태가 여기에 표시됩니다."
+    : !s ? "첫 상태를 기다리는 중입니다."
+    : lv === "none" ? (s.dht_fail_count > 0 ? "센서를 읽지 못했습니다. DHT11의 VCC·GND·DATA 연결을 확인하세요." : "첫 측정을 기다리는 중입니다(약 2초).")
+    : L.meaning;
+  els.t.textContent = s && app.connected && s.temperature_c !== null ? `${fmt(s.temperature_c, 1)} °C` : "값 없음";
+  if (s) {
+    const [r, g, b] = s.rgb || [0, 0, 0];
+    els.rgb.textContent = !s.light_on ? "꺼짐 (사용자가 끔)" : r && g ? `노랑 (${r}, ${g})` : r ? `빨강 (${r})` : g ? `초록 (${g})` : b ? `파랑 (${b}, 측정 중·센서 확인)` : "꺼짐";
+    els.lcd.textContent = s.lcd_ready ? "정상" : "인식 안 됨 (A4·A5·전원 확인)";
+    els.buzzState.textContent = s.buzzer_on === undefined ? "알 수 없음 (보드 코드 확인)"
+      : s.buzzer_on ? "켜짐 · 낮음 2번, 높음 3번" : "꺼짐 (사용자가 끔)";
+  }
+  // 기준 막대
+  const lo = s?.rh_low ?? 60, hi = s?.rh_high ?? 85;
+  els.bLow.style.width = lo + "%"; els.bOk.style.width = (hi - lo) + "%"; els.bHigh.style.width = (100 - hi) + "%";
+  els.tickLow.textContent = lo + "%"; els.tickHigh.textContent = hi + "%";
+  const rh = s?.humidity_pct;
+  els.marker.hidden = !(app.connected && rh !== null && rh !== undefined);
+  if (!els.marker.hidden) els.marker.style.left = Math.max(0, Math.min(100, rh)) + "%";
+  renderUpdated();
+}
+function renderUpdated() {
+  if (!app.lastStateAt || !app.connected) { els.updated.textContent = "아직 없음"; return; }
+  const sec = Math.round((Date.now() - app.lastStateAt) / 1000);
+  els.updated.textContent = sec <= 1 ? "방금" : `${sec}초 전`;
+}
+
+const NS = "http://www.w3.org/2000/svg";
+function svgEl(tag, attrs, parent) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; }
+function renderChart() {
+  const svg = els.chart; [...svg.querySelectorAll(":scope > g")].forEach((g) => g.remove());
+  const W = 960, H = 300, L = 48, R = 16, T = 14, B = 34, pw = W - L - R, ph = H - T - B;
+  const css = getComputedStyle(document.documentElement); const c = (n) => css.getPropertyValue(n).trim();
+  const g = svgEl("g", {}, svg);
+  const now = Date.now(), x = (at) => L + pw * (1 - (now - at) / HISTORY_MS), y = (v) => T + ph * (1 - v / 100);
+  const lo = app.state?.rh_low ?? 60, hi = app.state?.rh_high ?? 85;
+  // 상태 띠
+  svgEl("rect", { x: L, y: y(lo), width: pw, height: y(0) - y(lo), fill: c("--low-bg") }, g);
+  svgEl("rect", { x: L, y: y(hi), width: pw, height: y(lo) - y(hi), fill: c("--ok-bg") }, g);
+  svgEl("rect", { x: L, y: y(100), width: pw, height: y(hi) - y(100), fill: c("--high-bg") }, g);
+  // 눈금
+  for (const v of [0, 20, 40, 60, 80, 100]) {
+    svgEl("line", { x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: c("--chart-grid"), "stroke-width": 1 }, g);
+    const t = svgEl("text", { x: L - 8, y: y(v) + 4, "text-anchor": "end", "font-size": 12, fill: c("--muted") }, g); t.textContent = v + "%";
+  }
+  for (let m = 0; m <= 10; m += 2) {
+    const t = svgEl("text", { x: L + pw * (1 - m / 10), y: H - 10, "text-anchor": "middle", "font-size": 12, fill: c("--muted") }, g);
+    t.textContent = m === 0 ? "지금" : `${m}분 전`;
+  }
+  // 기준선 + 글자
+  for (const [v, name, col] of [[lo, `낮음 기준 ${lo}%`, "--low"], [hi, `높음 기준 ${hi}%`, "--high"]]) {
+    svgEl("line", { x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: c(col), "stroke-width": 2, "stroke-dasharray": "6 4" }, g);
+    const t = svgEl("text", { x: L + 6, y: y(v) - 6, "font-size": 12, "font-weight": 700, fill: c(col + "-fg") }, g); t.textContent = name;
+  }
+  // 선: null이 있으면 끊어서 그립니다
+  const pts = app.history;
+  let d = "", pen = false;
+  for (const p of pts) { if (p.rh === null || p.rh === undefined) { pen = false; continue; } d += (pen ? "L" : "M") + x(p.at).toFixed(1) + "," + y(p.rh).toFixed(1); pen = true; }
+  if (d) svgEl("path", { d, fill: "none", stroke: c("--chart-line"), "stroke-width": 2.5, "stroke-linejoin": "round" }, g);
+  const last = [...pts].reverse().find((p) => p.rh !== null && p.rh !== undefined);
+  if (last) svgEl("circle", { cx: x(last.at), cy: y(last.rh), r: 5, fill: c("--chart-line") }, g);
+  // 글 요약 (그래프의 텍스트 대안)
+  const vals = pts.filter((p) => p.rh !== null && p.rh !== undefined).map((p) => p.rh);
+  if (vals.length) {
+    const mn = Math.min(...vals), mx = Math.max(...vals);
+    const summary = `최근 ${Math.max(1, Math.round((now - pts[0].at) / 60000))}분 · 최저 ${fmt(mn)}% · 최고 ${fmt(mx)}% · 지금 ${fmt(last.rh)}%`;
+    els.trendSummary.textContent = summary; els.chartDesc.textContent = summary + `. 낮음 기준 ${lo}%, 높음 기준 ${hi}%.`;
+  }
+  // 표 (최근 20개)
+  const rows = pts.slice(-20).reverse();
+  els.trendTable.textContent = "";
+  if (!rows.length) { const tr = document.createElement("tr"); const td = document.createElement("td"); td.colSpan = 4; td.textContent = "기록 없음"; tr.append(td); els.trendTable.append(tr); }
+  for (const p of rows) {
+    const tr = document.createElement("tr");
+    for (const v of [timeStr(p.at), p.rh === null ? "값 없음" : fmt(p.rh, 1) + " %", p.t === null ? "값 없음" : fmt(p.t, 1) + " °C", LEVELS[p.level ?? "none"].text]) {
+      const td = document.createElement("td"); td.textContent = v; tr.append(td);
+    }
+    els.trendTable.append(tr);
+  }
+}
+
+/* ================= 기록·알림 ================= */
+const timeStr = (at) => { const d = new Date(at), p = (n) => String(n).padStart(2, "0"); return `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`; };
+function addLog(text) {
+  const li = document.createElement("li"); const t = document.createElement("time");
+  t.dateTime = new Date().toISOString(); t.textContent = timeStr(Date.now());
+  const s = document.createElement("span"); s.textContent = text; li.append(t, s);
+  els.log.prepend(li); while (els.log.children.length > 100) els.log.lastChild.remove();
+}
+function announce(text) { els.announcer.textContent = ""; setTimeout(() => { els.announcer.textContent = text; }, 50); }
+function beep(lv) {
+  const a = app.audio; if (!a) return;
+  const o = a.createOscillator(), gn = a.createGain(); o.frequency.value = lv === "high" ? 880 : 440;
+  gn.gain.value = 0.08; o.connect(gn).connect(a.destination); o.start(); o.stop(a.currentTime + 0.25);
+}
+els.csv.addEventListener("click", () => {
+  if (!app.records.length) { $("csv-note").textContent = "아직 저장할 측정값이 없습니다."; return; }
+  const head = "time,humidity_pct,temperature_c,rh_level,rh_low,rh_high,source\n";
+  const body = app.records.map((r) => [new Date(r.at).toISOString(), r.rh ?? "", r.t ?? "", r.level ?? "", r.low, r.high, r.src].join(",")).join("\n");
+  const blob = new Blob(["﻿" + head + body], { type: "text/csv;charset=utf-8" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+  a.download = `p07-humidity-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.csv`;
+  document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  $("csv-note").textContent = `${app.records.length}개 측정값을 CSV로 저장했습니다.`;
+});
+
+/* ================= 응답 없음 감시 ================= */
+let wasStale = false;
+setInterval(() => {
+  const stale = isStale();
+  els.nowCard.classList.toggle("is-stale", stale);
+  if (stale && !wasStale) {
+    setConn("stale", "응답 없음");
+    showBanner({ kind: "warn", title: "보드 응답이 3초 넘게 없습니다", text: "화면의 값은 마지막으로 받은 값입니다. 보드 LED가 꺼졌다고 가정하지 마세요. USB 연결과 보드 전원을 확인하세요." });
+    addLog("응답 없음 (3초 이상)"); announce("보드 응답이 없습니다. 마지막 값을 표시합니다.");
+  }
+  if (!stale && wasStale) { setConn("connected", "연결됨 · 다시 수신"); showBanner(app.source === "sim" ? { kind: "sim", title: "시뮬레이션 중", text: "가상 보드의 값입니다. 실제 측정이 아닙니다." } : null); addLog("수신 재개"); }
+  if (stale) setConn("stale", `응답 없음 ${Math.round((Date.now() - app.lastStateAt) / 1000)}초`);
+  wasStale = stale; updateControls(); renderUpdated();
+}, 500);
+
+renderNow(); renderChart();
+</script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>옵션 추천 · 딸기 하우스 습도 신호등</title>
+<meta name="description" content="Arduino 키트 부품으로 만들 수 있는 서비스 7가지를 비교하고 습도 신호등을 고른 이유를 정리합니다">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="stylesheet" href="assets/nav.css">
+</head>
+<body>
+<a class="skip" href="#main">본문으로 건너뛰기</a>
+<nav class="site-nav" aria-label="사이트 메뉴"><ul><li class="brand">딸기 하우스 습도 신호등</li><li><a href="index.html">홈</a></li><li><a href="dashboard.html">대시보드</a></li><li><a href="wiring.html">회로도</a></li><li><a href="options.html" aria-current="page">옵션 추천</a></li><li><a href="design.html">설계 근거</a></li></ul></nav>
+
+<main id="main">
+  <header style="display:grid;gap:10px">
+    <h1>부품·서비스 옵션 추천</h1>
+    <p class="lede">강의 키트(UNO 호환 보드와 센서·출력·표시 부품)만으로 만들 수 있는 서비스를 7가지로 정리하고, 같은 기준으로 비교했습니다. 맨 아래에 이 프로젝트가 1번을 고른 이유가 있습니다.</p>
+  </header>
+
+  <section aria-labelledby="kit">
+    <h2 id="kit">키트에서 쓸 수 있는 부품</h2>
+    <div class="cards">
+      <div class="card"><h3>입력·센서</h3><p class="small">DHT11 온습도, 조도 CdS, 10kΩ 가변저항, 택트 스위치, 기울기 스위치, 수위 센서, 소리 감지 모듈, LM35DZ 온도, 조이스틱, 4×4 키패드, 적외선 리모컨·수신부, RFID RC522, 화염 감지 소자</p></div>
+      <div class="card"><h3>출력</h3><p class="small">빨강·노랑·초록 LED, RGB LED 모듈(공통 −), 2핀 부저, SG90 서보, 28BYJ-48 스텝 모터 + ULN2003, 1채널 릴레이</p></div>
+      <div class="card"><h3>표시·시간</h3><p class="small">LCD1602 I2C, 1자리·4자리 FND, 74HC595, 8×8 도트매트릭스, DS1302 RTC</p></div>
+    </div>
+    <p class="note warn small">서보·스텝 모터는 별도의 안정된 5V 전원이 필요한데 키트 구성표에 없습니다. 능동형·모델 미상 부저나 화염 감지 소자처럼 정격을 모르는 부품은 GPIO에 바로 연결하지 않습니다(강의 안전 수칙).</p>
+  </section>
+
+  <section aria-labelledby="list">
+    <h2 id="list">추천 옵션 7가지</h2>
+    <div class="cards">
+      <article class="card" aria-labelledby="o1">
+        <span class="tag pick">선택함</span>
+        <h3 id="o1">1. 딸기 하우스 습도 신호등</h3>
+        <p><b>사용자</b> 하우스 관리자 · <b>문제</b> 습도가 벗어난 걸 늦게 알아챔</p>
+        <p class="small"><b>부품</b> DHT11, RGB LED, 부저, LCD1602 I2C</p>
+        <p class="small"><b>대시보드</b> 습도·온도·상태, 10분 그래프, 기준값·밝기·부저 설정</p>
+      </article>
+      <article class="card" aria-labelledby="o2">
+        <span class="tag">강의 옵션 B</span>
+        <h3 id="o2">2. 작업실 환경판</h3>
+        <p><b>사용자</b> 공방·작업실 이용자 · <b>문제</b> 덥고 어두운데 모르고 오래 작업함</p>
+        <p class="small"><b>부품</b> DHT11, 조도 CdS + 10kΩ, LCD, LED</p>
+        <p class="small"><b>대시보드</b> 온도·습도·밝기 3가지와 "쉬세요/환기하세요" 안내</p>
+      </article>
+      <article class="card" aria-labelledby="o3">
+        <span class="tag">강의 옵션 A</span>
+        <h3 id="o3">3. 집중 공간 자동 조명</h3>
+        <p><b>사용자</b> 공부하는 학생 · <b>문제</b> 어두워져도 조명을 늦게 켬</p>
+        <p class="small"><b>부품</b> 조도 CdS, 가변저항(원하는 밝기), RGB LED</p>
+        <p class="small"><b>대시보드</b> 현재 밝기, 자동/수동 전환, 켜짐·꺼짐 두 기준값</p>
+      </article>
+      <article class="card" aria-labelledby="o4">
+        <h3 id="o4">4. 화분 물 부족 알리미</h3>
+        <p><b>사용자</b> 화분을 자주 잊는 사람 · <b>문제</b> 물 주는 때를 놓침</p>
+        <p class="small"><b>부품</b> 수위 센서, 부저, 노랑·초록 LED, LCD</p>
+        <p class="small"><b>대시보드</b> 수위 단계, 마지막으로 물 준 시각</p>
+        <p class="small muted">수위 센서는 계속 전원을 주면 부식되므로 잴 때만 켭니다.</p>
+      </article>
+      <article class="card" aria-labelledby="o5">
+        <h3 id="o5">5. 교실 소음 신호등</h3>
+        <p><b>사용자</b> 교사·학생 · <b>문제</b> 시끄러워지는 걸 말로만 알림</p>
+        <p class="small"><b>부품</b> 소리 감지 모듈(AO), RGB LED, 4자리 FND</p>
+        <p class="small"><b>대시보드</b> 소음 단계, 시끄러웠던 시간 기록</p>
+      </article>
+      <article class="card" aria-labelledby="o6">
+        <span class="tag warn">어려움</span>
+        <h3 id="o6">6. RFID 출입 기록판</h3>
+        <p><b>사용자</b> 동아리방 관리자 · <b>문제</b> 누가 언제 왔는지 모름</p>
+        <p class="small"><b>부품</b> RC522 + 카드, DS1302 RTC, LCD, 부저</p>
+        <p class="small"><b>대시보드</b> 출입 목록, 등록 카드 관리</p>
+        <p class="small muted">RC522는 3.3V 부품이라 신호선마다 분압 저항이 필요합니다.</p>
+      </article>
+      <article class="card" aria-labelledby="o7">
+        <span class="tag warn">외부 전원 필요</span>
+        <h3 id="o7">7. 키패드 잠금 상자</h3>
+        <p><b>사용자</b> 사물함 사용자 · <b>문제</b> 열쇠를 잃어버림</p>
+        <p class="small"><b>부품</b> 4×4 키패드, LCD, SG90 서보</p>
+        <p class="small"><b>대시보드</b> 잠김 상태, 틀린 시도 횟수</p>
+        <p class="small muted">서보용 별도 5V 전원이 키트에 없어 지금은 보류합니다.</p>
+      </article>
+    </div>
+  </section>
+
+  <section aria-labelledby="compare">
+    <h2 id="compare">같은 기준으로 비교</h2>
+    <div class="tablebox" tabindex="0" role="region" aria-labelledby="compare">
+      <table>
+        <caption>○ 충족 · △ 조건부 · ✕ 어려움 (글자로도 표시)</caption>
+        <thead><tr><th scope="col">옵션</th><th scope="col">키트만으로 가능</th><th scope="col">USB 전원만</th><th scope="col">실제 입력 2개 이상</th><th scope="col">출력 제어</th><th scope="col">상태·오류 표현</th><th scope="col">난이도</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">1. 습도 신호등</th><td>○ 가능</td><td>○ 예</td><td>○ 습도·온도</td><td>○ RGB·부저·LCD</td><td>○ 낮음·적정·높음·값 없음</td><td>보통</td></tr>
+          <tr><th scope="row">2. 작업실 환경판</th><td>○ 가능</td><td>○ 예</td><td>○ 온도·습도·밝기</td><td>△ LED 1개</td><td>○ 쾌적·주의</td><td>보통</td></tr>
+          <tr><th scope="row">3. 자동 조명</th><td>○ 가능</td><td>○ 예</td><td>○ 밝기·가변저항</td><td>○ RGB</td><td>△ 켜짐·꺼짐</td><td>쉬움</td></tr>
+          <tr><th scope="row">4. 물 부족 알리미</th><td>○ 가능</td><td>○ 예</td><td>△ 수위 1개</td><td>○ 부저·LED</td><td>○ 단계별</td><td>쉬움</td></tr>
+          <tr><th scope="row">5. 소음 신호등</th><td>○ 가능</td><td>○ 예</td><td>△ 소리 1개</td><td>○ RGB·FND</td><td>△ 값이 크게 흔들림</td><td>보통</td></tr>
+          <tr><th scope="row">6. RFID 출입</th><td>○ 가능</td><td>○ 예</td><td>○ 카드·시간</td><td>○ 부저·LCD</td><td>○ 허용·거부</td><td>어려움 (3.3V)</td></tr>
+          <tr><th scope="row">7. 키패드 잠금</th><td>✕ 전원 부족</td><td>✕ 서보 전원 별도</td><td>○ 키 입력</td><td>○ 서보</td><td>○ 잠김·열림</td><td>어려움</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="why">
+    <h2 id="why">1번을 고른 이유</h2>
+    <ul class="plain">
+      <li><b>문제가 분명합니다.</b> 딸기는 습도가 높으면 잿빛곰팡이병, 낮으면 잎 끝 마름이 생깁니다. "범위를 벗어났는가"라는 한 가지 질문에 답하면 됩니다.</li>
+      <li><b>입력 2개(습도·온도)와 출력 3가지(RGB·부저·LCD)</b>를 키트와 USB 전원만으로 만들 수 있습니다.</li>
+      <li><b>상태가 4가지로 딱 나뉩니다</b>(낮음·적정·높음·값 없음). 색·모양·글자·소리로 같은 뜻을 여러 번 전할 수 있어 접근성 설계를 보여 주기 좋습니다.</li>
+      <li><b>멀리서도, 가까이서도</b> 쓸 수 있습니다. 작업 중에는 불빛과 부저로, PC 앞에서는 그래프로 추이를 봅니다.</li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="questions">
+    <h2 id="questions">옵션을 고를 때 스스로 물어본 질문</h2>
+    <div class="tablebox" tabindex="0" role="region" aria-labelledby="questions">
+      <table>
+        <thead><tr><th scope="col">질문</th><th scope="col">이 프로젝트의 답</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">누가, 어디서 쓰나요?</th><td>딸기 하우스 관리자 · 하우스 안, 보드 옆 PC 한 대</td></tr>
+          <tr><th scope="row">그 사람이 가장 먼저 알고 싶은 것은?</th><td>지금 습도가 관리 범위 안인지, 아니면 무엇을 해야 하는지</td></tr>
+          <tr><th scope="row">화면을 못 볼 때는 어떻게 알리나요?</th><td>보드 LED 색과 부저(상태가 바뀔 때만 울림)</td></tr>
+          <tr><th scope="row">경보가 귀찮아지면?</th><td>대시보드에서 부저만 끌 수 있고, 적정일 때는 울리지 않음</td></tr>
+          <tr><th scope="row">센서가 고장 나면?</th><td>0 %로 속이지 않고 "값 없음"과 파랑 불빛으로 알림</td></tr>
+          <tr><th scope="row">기준이 작물마다 다르면?</th><td>대시보드에서 낮음·높음 기준을 바꾸고, 딸기 초기값으로 되돌릴 수 있음</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+<footer><p>부품 목록은 강의 자료(2026-10-23 · 10-29)의 레슨별 "필요 부품"을 바탕으로 정리했습니다. 수량은 판매처 구성표를 확인하세요.</p></footer>
+</body>
+</html>

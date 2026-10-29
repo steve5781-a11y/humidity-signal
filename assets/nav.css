@@ -1,0 +1,10 @@
+/* 모든 페이지 공통 메뉴 — 같은 위치·같은 순서 (ISO 9241-110 기대 부합성, WCAG 3.2.3 일관된 내비게이션)
+   색은 각 페이지의 토큰(--surface, --fg, --soft, --brand, --brand-fg, --line)을 그대로 씁니다. */
+.site-nav{border-bottom:1px solid var(--line);background:var(--surface)}
+.site-nav ul{max-width:1240px;margin:0 auto;padding:8px 16px;list-style:none;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.site-nav .brand{font-weight:800;margin-right:auto;padding:0 8px 0 0;color:var(--fg)}
+.site-nav a{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border-radius:8px;color:var(--fg);text-decoration:none;font-weight:700}
+.site-nav a:hover{background:var(--soft)}
+.site-nav a[aria-current="page"]{background:var(--brand);color:var(--brand-fg)}
+.site-nav a:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+@media (max-width:560px){.site-nav .brand{width:100%}}

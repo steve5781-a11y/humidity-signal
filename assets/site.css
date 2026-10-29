@@ -1,0 +1,67 @@
+/* 홈·옵션 추천·설계 근거 페이지 공통 스타일. 색 토큰은 대시보드(dashboard.html)와 같습니다. */
+:root{
+  --bg:#f6f7f3; --surface:#ffffff; --soft:#eef1ea; --line:#c9d0c5; --fg:#18211b; --muted:#4c5a50;
+  --brand:#1f5136; --brand-fg:#ffffff; --focus:#0b57d0;
+  --low:#a86b00;  --low-bg:#fff3cc;  --low-fg:#6b4300;
+  --ok:#1f7a3d;   --ok-bg:#e1f2e6;   --ok-fg:#14532b;
+  --high:#c62828; --high-bg:#fde4e2; --high-fg:#8a1414;
+  --info-bg:#e2ecfb; --info-fg:#123e80;
+  --font:"Pretendard","Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;
+  --mono:ui-monospace,"Cascadia Mono",Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121614; --surface:#1b211d; --soft:#232b25; --line:#3a463e; --fg:#e9efea; --muted:#aab8ae;
+  --brand:#8fd0a8; --brand-fg:#0d1a12; --focus:#8ab4ff;
+  --low:#f2c14e; --low-bg:#3d3010; --low-fg:#ffe7a6;
+  --ok:#6fd48f;  --ok-bg:#183524; --ok-fg:#c4f0d2;
+  --high:#ff8a80;--high-bg:#4a1f1d;--high-fg:#ffd2cd;
+  --info-bg:#1b2d4a; --info-fg:#c9dcff; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121614; --surface:#1b211d; --soft:#232b25; --line:#3a463e; --fg:#e9efea; --muted:#aab8ae;
+  --brand:#8fd0a8; --brand-fg:#0d1a12; --focus:#8ab4ff;
+  --low:#f2c14e; --low-bg:#3d3010; --low-fg:#ffe7a6;
+  --ok:#6fd48f;  --ok-bg:#183524; --ok-fg:#c4f0d2;
+  --high:#ff8a80;--high-bg:#4a1f1d;--high-fg:#ffd2cd;
+  --info-bg:#1b2d4a; --info-fg:#c9dcff; color-scheme:dark}
+*{box-sizing:border-box}
+html{font-size:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);font-size:1.0625rem;line-height:1.65}
+a{color:var(--brand);text-underline-offset:3px}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.skip{position:absolute;left:-9999px;top:8px;background:var(--surface);color:var(--fg);padding:8px 12px;border-radius:6px;z-index:10}
+.skip:focus{left:12px}
+main{max-width:1100px;margin:0 auto;padding:28px 16px 64px;display:grid;gap:32px}
+h1,h2,h3{line-height:1.3;margin:0}
+h1{font-size:clamp(1.6rem,3vw,2.2rem);font-weight:800;letter-spacing:-.01em}
+h2{font-size:1.3rem;font-weight:800}
+h3{font-size:1.08rem;font-weight:800}
+p{margin:0}
+.lede{font-size:1.12rem;color:var(--muted);max-width:68ch}
+.muted{color:var(--muted)}
+.small{font-size:.92rem}
+code{font-family:var(--mono);font-size:.92em;background:var(--soft);padding:1px 5px;border-radius:4px}
+section{display:grid;gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;display:grid;gap:10px;align-content:start;min-width:0}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.card a.go{display:inline-flex;align-items:center;min-height:44px;font-weight:700}
+.tag{display:inline-block;font-size:.82rem;font-weight:700;border-radius:999px;padding:2px 10px;background:var(--soft);color:var(--muted)}
+.tag.pick{background:var(--ok-bg);color:var(--ok-fg)}
+.tag.warn{background:var(--low-bg);color:var(--low-fg)}
+.note{border-radius:10px;padding:12px 14px;background:var(--info-bg);color:var(--info-fg)}
+.note.warn{background:var(--low-bg);color:var(--low-fg)}
+ul.plain,ol.plain{margin:0;padding-left:1.2em;display:grid;gap:6px}
+.tablebox{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.tablebox:focus-visible{outline:3px solid var(--focus)}
+table{border-collapse:collapse;width:100%;min-width:640px}
+caption{text-align:left;font-weight:800;padding:12px 14px 4px}
+th,td{border-bottom:1px solid var(--line);padding:10px 12px;text-align:left;vertical-align:top}
+thead th{font-size:.9rem;color:var(--muted);background:var(--soft)}
+tbody tr:last-child th,tbody tr:last-child td{border-bottom:0}
+.res-ok{color:var(--ok-fg);font-weight:700}
+.res-no{color:var(--low-fg);font-weight:700}
+.steps{counter-reset:s;list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.steps li{counter-increment:s;display:grid;grid-template-columns:36px 1fr;gap:10px;align-items:start}
+.steps li::before{content:counter(s);display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:var(--brand);color:var(--brand-fg);font-weight:800}
+.swatch{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:6px;border:1px solid var(--line)}
+footer{max-width:1100px;margin:0 auto;padding:0 16px 40px;color:var(--muted);font-size:.92rem}

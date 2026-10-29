@@ -8,18 +8,18 @@
 :root{
   --bg:#fbfaf6; --surface:#ffffff; --soft:#eef1e6; --line:#d6dacd;
   --fg:#1f2a22; --muted:#55665a; --brand:#24533a; --brand-fg:#ffffff;
-  --step:#c4621a; --warn-bg:#fff4e5; --warn-fg:#7a3d00; --focus:#1b5fd1;
+  --step:#c4621a; --step-fg:#9a4a10; --warn-bg:#fff4e5; --warn-fg:#7a3d00; --focus:#1b5fd1;
   --f-body:"Noto Sans KR","Malgun Gothic","Apple SD Gothic Neo",sans-serif;
   --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#151a16; --surface:#1d241f; --soft:#233028; --line:#34433a;
   --fg:#e8eee9; --muted:#a9b8ad; --brand:#8fd0a8; --brand-fg:#0f1a13;
-  --step:#f0a061; --warn-bg:#3a2a14; --warn-fg:#ffd3a1; --focus:#8ab4ff; color-scheme:dark}}
+  --step:#f0a061; --step-fg:#f0a061; --warn-bg:#3a2a14; --warn-fg:#ffd3a1; --focus:#8ab4ff; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#151a16; --surface:#1d241f; --soft:#233028; --line:#34433a;
   --fg:#e8eee9; --muted:#a9b8ad; --brand:#8fd0a8; --brand-fg:#0f1a13;
-  --step:#f0a061; --warn-bg:#3a2a14; --warn-fg:#ffd3a1; --focus:#8ab4ff; color-scheme:dark}
+  --step:#f0a061; --step-fg:#f0a061; --warn-bg:#3a2a14; --warn-fg:#ffd3a1; --focus:#8ab4ff; color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.65;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:32px 64px}
@@ -43,7 +43,7 @@ section{display:grid;gap:16px}
 .bench{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
 .bench-head{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}
 .stepcard{padding:18px;display:grid;gap:8px;border-bottom:1px solid var(--line);border-top:4px solid var(--step)}
-.stepno{font-family:var(--f-mono);font-weight:600;color:var(--step);font-size:.9rem;letter-spacing:.05em}
+.stepno{font-family:var(--f-mono);font-weight:600;color:var(--step-fg);font-size:.9rem;letter-spacing:.05em}
 .stepcard h3{font-size:1.25rem}
 .controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 button,select{font:inherit;font-size:.95rem;min-height:44px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:0 16px;cursor:pointer}

@@ -60,10 +60,10 @@
         <thead><tr><th scope="col">관련 기준</th><th scope="col">내 규칙</th><th scope="col">수정</th><th scope="col">확인 방법</th><th scope="col">실제 결과</th></tr></thead>
         <tbody>
           <tr><th scope="row">과업 적합성</th><td>첫 화면에 지금 습도·상태·할 일만 크게</td><td>설정은 오른쪽, 기록·도움말은 아래로</td><td>대시보드 첫 화면 확인</td><td class="res-ok">맨 위 카드에 습도·상태·뜻 표시</td></tr>
-          <tr><th scope="row">자기 설명성</th><td>상태마다 뜻과 할 일을 문장으로</td><td>"보드 신호등 출력"(명령값)과 실제 LED를 구분해 설명</td><td>상태 4가지를 시뮬레이션으로 확인</td><td class="res-ok">상태별 문장 표시</td></tr>
+          <tr><th scope="row">자기 설명성</th><td>상태마다 뜻과 할 일을 문장으로</td><td>"보드 신호등 출력"(명령값)과 실제 LED를 구분해 설명</td><td>시뮬레이션으로 적정·높음·낮음을 차례로 만듦</td><td class="res-ok">상태별 문장·색·LED 설명 표시 (2026-10-29)</td></tr>
           <tr><th scope="row">기대 부합성</th><td>보드 LED·LCD·화면이 같은 색·같은 낱말</td><td>건조 색을 노랑으로 통일, 메뉴를 모든 페이지 같은 자리에</td><td>실물 보드와 화면을 나란히 비교</td><td class="res-ok">일치함 (2026-10-29)</td></tr>
           <tr><th scope="row">학습 용이성</th><td>보드 없이도 연습 가능</td><td>시뮬레이션 연결 방식, 도움말 위치 고정</td><td>시뮬레이션으로 연결·설정 시험</td><td class="res-ok">보드 없이 모든 화면 동작</td></tr>
-          <tr><th scope="row">제어 가능성</th><td>사용자가 끄고 멈출 수 있음</td><td>화면 갱신 멈춤, 신호등·<b>보드 부저</b>·화면 알림음 각각 켜고 끄기</td><td>버튼마다 보드 응답(ack) 확인</td><td class="res-ok">명령 적용·거절 응답 확인</td></tr>
+          <tr><th scope="row">제어 가능성</th><td>사용자가 끄고 멈출 수 있음</td><td>화면 갱신 멈춤, 신호등·<b>보드 부저</b>·화면 알림음 각각 켜고 끄기</td><td>버튼마다 응답(ack) 확인</td><td class="res-ok">시뮬레이션에서 부저 끄기 적용 확인</td></tr>
           <tr><th scope="row">사용 오류 견고성</th><td>잘못된 값을 보내기 전에 막고, 보드도 다시 검사</td><td>틀린 칸 표시·이유·고치는 법, 보드는 <code>error</code>로 거절</td><td>낮음 50 / 높음 30 보내기</td><td class="res-ok">보드가 <code>low_not_below_high</code>로 거절</td></tr>
           <tr><th scope="row">사용자 참여</th><td>작물·취향에 맞게 바꿀 수 있음</td><td>기준값·밝기 조절, 딸기 초기값 한 번에 되돌리기</td><td>기준을 바꾸고 색 변화 확인</td><td class="res-ok">바꾼 기준으로 판단</td></tr>
         </tbody>
@@ -78,7 +78,7 @@
         <thead><tr><th scope="col">관련 기준</th><th scope="col">내 규칙</th><th scope="col">확인 방법</th><th scope="col">실제 결과</th></tr></thead>
         <tbody>
           <tr><th scope="row">발견 가능성</th><td>가장 중요한 값(습도)을 가장 크게, 맨 위에</td><td>첫 화면 캡처</td><td class="res-ok">습도 숫자가 화면에서 가장 큼</td></tr>
-          <tr><th scope="row">구별 가능성</th><td>상태를 색 + 모양(▼●▲◌) + 글자로 구별</td><td>흑백으로 봐도 구별되는지</td><td class="res-ok">모양·글자만으로 구별됨</td></tr>
+          <tr><th scope="row">구별 가능성</th><td>상태를 색 + 모양(▼●▲◌) + 글자로 구별</td><td>화면에 모양·글자가 함께 나오는지</td><td class="res-ok">▼●▲◌와 글자 함께 표시 (흑백 시험은 미실시)</td></tr>
           <tr><th scope="row">간결성</th><td>1초마다 바뀌는 값은 화면 낭독기에 알리지 않고 상태 변화만 알림</td><td>코드의 알림 대상 확인</td><td class="res-ok">상태 변화·명령 결과만 알림</td></tr>
           <tr><th scope="row">명확한 해석</th><td>단위(%·°C)를 항상 붙이고, 값 없음은 0이 아닌 "값 없음"</td><td>센서 실패 시뮬레이션</td><td class="res-ok">"값 없음" 표시, 0으로 바꾸지 않음</td></tr>
           <tr><th scope="row">주의 분산 최소화</th><td>부저는 상태가 바뀔 때만, 화면 알림음은 기본 꺼짐</td><td>같은 상태 유지 시 소리 확인</td><td class="res-ok">반복해서 울리지 않음</td></tr>
@@ -96,26 +96,32 @@
         <thead><tr><th scope="col">성공 기준</th><th scope="col">내 규칙</th><th scope="col">확인 방법</th><th scope="col">결과</th><th scope="col">미확인</th></tr></thead>
         <tbody id="wcag-rows">
           <tr><th scope="row">1.1.1 텍스트 대안 (A)</th><td>그래프에 요약 문장 + 최근 20개 값 표</td><td>그래프 아래 표 확인</td><td class="res-ok">요약·표 제공</td><td>—</td></tr>
-          <tr><th scope="row">1.3.1 정보와 관계 (A)</th><td>제목 구조, 표 머리글, 입력칸 레이블 연결</td><td>자동 검사 + 코드 확인</td><td data-axe>자동 검사 결과 아래 참고</td><td>—</td></tr>
-          <tr><th scope="row">1.4.1 색 사용 (A)</th><td>색과 함께 모양·글자, 보드는 부저 횟수</td><td>흑백 보기</td><td class="res-ok">색 없이도 구별</td><td>—</td></tr>
-          <tr><th scope="row">1.4.3 최소 대비 (AA)</th><td>글자 4.5:1 이상 (밝은·어두운 테마)</td><td>자동 검사, 노랑 글자색 계산(#6b4300 / #fff3cc ≈ 7.6:1)</td><td data-axe>자동 검사 결과 아래 참고</td><td>—</td></tr>
-          <tr><th scope="row">1.4.10 리플로 (AA)</th><td>390px 폭에서 가로 스크롤 없음 (회로도 그림은 가로 이동 허용)</td><td>좁은 창으로 열기</td><td class="res-ok">본문은 한 열로 바뀜</td><td>회로도 그림은 2차원 내용이라 예외</td></tr>
+          <tr><th scope="row">1.3.1 정보와 관계 (A)</th><td>제목 구조, 표 머리글, 입력칸 레이블 연결</td><td>axe-core 자동 검사 + 코드 확인</td><td class="res-ok">위반 0건</td><td>—</td></tr>
+          <tr><th scope="row">1.4.1 색 사용 (A)</th><td>색과 함께 모양·글자, 보드는 부저 횟수</td><td>모양·글자 함께 표시 확인</td><td class="res-ok">색 + 모양 + 글자 (보드는 + 부저 횟수)</td><td>—</td></tr>
+          <tr><th scope="row">1.4.3 최소 대비 (AA)</th><td>글자 4.5:1 이상 (밝은·어두운 테마)</td><td>자동 검사, 노랑 글자색 계산(#6b4300 / #fff3cc ≈ 7.6:1)</td><td class="res-ok">위반 0건 (밝은 테마)</td><td>어두운 테마</td></tr>
+          <tr><th scope="row">1.4.10 리플로 (AA)</th><td>390px 폭에서 가로 스크롤 없음 (회로도 그림은 가로 이동 허용)</td><td>390px 폭으로 5개 페이지 열고 가로 넘침 측정</td><td class="res-ok">가로 스크롤 없음 (5/5)</td><td>회로도 그림은 2차원 내용이라 예외</td></tr>
           <tr><th scope="row">1.4.11 비텍스트 대비 (AA)</th><td>상태 테두리·그래프 기준선 3:1 이상</td><td>노랑 테두리 #a86b00 / 흰색 ≈ 4.4:1 계산</td><td class="res-ok">3:1 이상</td><td>—</td></tr>
-          <tr><th scope="row">2.1.1 키보드 (A)</th><td>모든 조작을 Tab·Enter·Space로</td><td>마우스 없이 연결·설정·부저 끄기</td><td class="res-no">제작자 직접 확인 필요</td><td>Web Serial 포트 선택 창은 브라우저 기본 창</td></tr>
+          <tr><th scope="row">2.1.1 키보드 (A)</th><td>모든 조작을 Tab·Enter·Space로</td><td>Tab으로 메뉴·버튼 이동</td><td class="res-ok">Tab 이동·초점 확인</td><td>모든 버튼을 키보드만으로 끝까지 조작하는 시험, Web Serial 포트 선택 창(브라우저 기본 창)</td></tr>
           <tr><th scope="row">2.2.2 일시 정지 (A)</th><td>자동 갱신을 멈출 수 있음</td><td>"화면 갱신 멈춤" 버튼</td><td class="res-ok">버튼 제공</td><td>—</td></tr>
-          <tr><th scope="row">2.4.1 블록 건너뛰기 (A)</th><td>모든 페이지 첫 Tab에 "본문으로 건너뛰기"</td><td>Tab 한 번 누르기</td><td class="res-ok">링크 나타남</td><td>—</td></tr>
-          <tr><th scope="row">2.4.7 / 2.4.11 초점 (AA)</th><td>3px 초점 테두리, 고정 머리글 없음</td><td>Tab으로 이동하며 확인</td><td class="res-ok">테두리 보임, 가려지지 않음</td><td>—</td></tr>
+          <tr><th scope="row">2.4.1 블록 건너뛰기 (A)</th><td>모든 페이지 첫 Tab에 "본문으로 건너뛰기"</td><td>Tab 한 번 누르기 (5개 페이지)</td><td class="res-ok">첫 초점이 건너뛰기 링크 (5/5)</td><td>—</td></tr>
+          <tr><th scope="row">2.4.7 / 2.4.11 초점 (AA)</th><td>3px 초점 테두리, 고정 머리글 없음</td><td>Tab으로 이동하며 화면 확인</td><td class="res-ok">파란 테두리 보임, 가려지지 않음</td><td>—</td></tr>
           <tr><th scope="row">2.5.8 대상 크기 (AA)</th><td>버튼·입력·메뉴 높이 44px (기준 24px)</td><td>스타일 확인</td><td class="res-ok">44px</td><td>—</td></tr>
           <tr><th scope="row">3.2.3 / 3.2.6 일관성 (AA / A)</th><td>메뉴·도움말 위치가 모든 페이지 같음</td><td>페이지 비교</td><td class="res-ok">같은 위치</td><td>—</td></tr>
           <tr><th scope="row">3.3.1 / 3.3.3 오류 식별·제안 (A / AA)</th><td>틀린 칸 표시(aria-invalid), 이유와 고치는 법</td><td>낮음 ≥ 높음 입력</td><td class="res-ok">"높음 기준이 낮음보다 커야 합니다"</td><td>—</td></tr>
-          <tr><th scope="row">4.1.2 이름·역할·값 (A)</th><td>켜기·끄기 버튼에 aria-pressed</td><td>자동 검사 + 코드 확인</td><td data-axe>자동 검사 결과 아래 참고</td><td>화면 낭독기 실제 낭독</td></tr>
+          <tr><th scope="row">4.1.2 이름·역할·값 (A)</th><td>켜기·끄기 버튼에 aria-pressed</td><td>axe-core 자동 검사 + 코드 확인</td><td class="res-ok">위반 0건</td><td>화면 낭독기 실제 낭독</td></tr>
           <tr><th scope="row">4.1.3 상태 메시지 (AA)</th><td>상태 변화·명령 결과만 role="status"로 알림</td><td>코드 확인</td><td class="res-ok">적용</td><td>NVDA·내레이터로 듣기</td></tr>
         </tbody>
       </table>
     </div>
     <div class="card" id="axe-result">
       <h3>자동 검사 (axe-core)</h3>
-      <p id="axe-text">배포한 뒤 실제 주소에서 검사하고 결과를 적습니다.</p>
+      <p id="axe-text">2026-10-29, 배포한 주소(GitHub Pages)에서 axe-core 4.10.2로 WCAG 2.0·2.1·2.2 A·AA 규칙을 검사했습니다(Chrome, 밝은 테마).</p>
+      <ul class="plain small">
+        <li>홈·옵션 추천·설계 근거·대시보드: <b>위반 0건</b>. 대시보드는 시뮬레이션으로 적정·높음·낮음 상태를 각각 띄운 뒤에도 0건.</li>
+        <li>회로도: 처음 검사에서 단계 번호 글자 대비 4.11:1(기준 4.5:1) 1건 → 글자색을 #9a4a10(약 6.3:1)으로 바꿔 고침.</li>
+        <li>자동으로 판정하지 못한 항목: 배경이 겹치는 글자의 대비(color-contrast 일부) — 위 표의 계산값으로 대신 확인.</li>
+        <li>검사하지 않은 것: 어두운 테마, 화면 낭독기 낭독, 200 % 확대.</li>
+      </ul>
     </div>
   </section>
 
